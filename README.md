@@ -12,10 +12,7 @@
 
 3. Code (included in an appendix)
 
-The project focuses on creating a visualization related to sustainability and environmental issues. Specifically, students are asked to design and build a visualization that might:
-- Help people understand the size/impact of adverse environmental events
-- Help people understand their personal impact on the environment
-- Help people minimize their contribution to environmental issues
+The project focuses on creating a visualization using real-world data related to The OECD Environmental Statistics database which provide a unique collection of policy-relevant environmental statistics. 
 
 The Process Book should include:
 - Title page
@@ -32,3 +29,4 @@ The project is weighted at 70% of the course grade and includes:
 - Design Process Book (30%)
 - Website (20%)
 - Reflection (15%)
+
