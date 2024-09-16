@@ -12,23 +12,7 @@
 
 3. Code (included in an appendix)
 
-The project focuses on creating a visualization using real-world data related to The OECD Environmental Statistics database which provide a unique collection of policy-relevant environmental statistics:
-- You need to find at least three different visualizations.
-- You should not choose visualizations that have already been discussed in blogs, textbooks, or other academic sources.
-
-Good places to look for these visualizations include:
-- Newspapers
-- Information-style websites
-- Scientific papers
-
-Your task is to critique these visualizations, not to create your own. When critiquing the visualizations, you'll likely need to consider aspects such as:
-- Effectiveness in communicating the data
-- Design choices
-- Clarity and ease of understanding
-- Appropriateness for the target audience
-- Use of color, layout, and other visual elements
-- Any interactive features (if present)
-- Accuracy and completeness of the data representation
+The project focuses on creating a visualization using real-world data related to The OECD Environmental Statistics database which provide a unique collection of policy-relevant environmental statistics.
 
 The Process Book should include:
 - Title page
