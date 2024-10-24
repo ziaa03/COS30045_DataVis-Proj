@@ -5,6 +5,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-geist-sans: 'GeistSans', sans-serif;
+  --font-geist-mono: 'GeistMono', monospace;
+  --font-orbitron: 'Orbitron', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,14 +17,52 @@
   }
 }
 
+* {
+  margin: 0;
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  /* font-family: Arial, Helvetica, sans-serif; */
+  /* font-family: 'Orbitron', sans-serif; */
+  font-family: var(--font-orbitron);
+  margin: 0;
+  letter-spacing: 0.1rem;
+  line-height: 1.5;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+.landing-container {
+  background-image: url('/images/wallpaper.jpg'); /* Corrected path */
+  background-size: cover; /* Optional: cover the container */
+  background-position: center; /* Optional: center the background */
+  width: 100%; /* Ensuring full width */
+  height: 100vh; /* Optional: full viewport height */
+  filter: brightness(0.30) blur(2px);
+}
+
+.navbar {
+  backdrop-filter: blur(10px);
+  letter-spacing: 0rem;
+}
+
+.name {
+  letter-spacing: 0rem;
+}
+
+.scroll-section {
+  scroll-snap-align: start; /* Snap to the start of the section */
+}
+
+.footer {
+  backdrop-filter: blur(10px);
 }

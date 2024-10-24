@@ -11,6 +11,11 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 });
+const getOrbitron = localFont({
+  src: "../fonts/Orbitron.woff",
+  variable: "--font-orbitron",
+  weight: "100 900",
+});
 
 export const metadata = {
   title: "Create Next App",
@@ -21,7 +26,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${getOrbitron.variable} antialiased`}
       >
         {children}
       </body>
