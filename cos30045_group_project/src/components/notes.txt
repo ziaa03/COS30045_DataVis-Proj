@@ -1,0 +1,36 @@
+Tailwind CSS 
+
+w - width
+h - height 
+dvh - viewport height 
+
+
+Position
+- just type:
+absolute
+relative 
+
+- to center:
+mx-auto
+
+
+Padding 
+py - padding y
+px - padding x
+
+
+Breakpoints
+md - responsive breakpoint 
+
+
+Spacing Between Elements 
+space-y: vertical spacing 
+space-x: horizontal spacing 
+gap-'num': spacing between grid items 
+
+
+Font Size 
+text-'num'
+
+
+

@@ -1,10 +1,12 @@
 // pages/_app.js
 import './globals.css'; // Make sure to include global styles
-import Navbar from '../components/navbar';
-import Landing from '../components/landing';
-import Footer from '../components/footer';
-import Introduction from '../components/introduction';
-import Objective from '../components/objective';
+import Navbar from '../components/Navbar';
+import Landing from '../components/Landing';
+import Footer from '../components/Footer';
+import Introduction from '../components/Introduction';
+import Objectives from '../components/Objectives';
+import Visual from '../components/Visual';
+import React from 'react';
 
 function MyApp() {
   return (
@@ -12,7 +14,8 @@ function MyApp() {
       <Navbar />
       <Landing />
       <Introduction />
-      <Objective />
+      <Objectives />
+      <Visual />
       <Footer />
     </>
   );
