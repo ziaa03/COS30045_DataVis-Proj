@@ -11,6 +11,7 @@
   --font-cinzel: 'Cinzel', serif;
   --font-marcellus: 'Marcellus', serif;
   --font-poppins: 'Poppins', sans-serif;
+  --font-roboto: 'Roboto', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,9 +33,9 @@ body {
   background: var(--background);
   /* font-family: Arial, Helvetica, sans-serif; */
   /* font-family: 'Orbitron', sans-serif; */
-  font-family: var(--font-geist-mono);
+  font-family: var(--font-roboto);
   margin: 0;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   line-height: 1.5;
 }
 
@@ -71,11 +72,11 @@ body {
 }
 
 .title {
-  font-family: var(--font-orbitron); 
+  font-family: var(--font-roboto); 
   font-size: 4rem; 
   font-weight: 700;
   text-align: center;
-  letter-spacing: 2px; 
+  letter-spacing: 3px; 
   font-style: bold; 
   text-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); 
   font-variant: small-caps; 

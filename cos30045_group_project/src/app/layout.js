@@ -35,6 +35,12 @@ const poppins = localFont({
   weight: "100 900",
 });
 
+const roboto = localFont({
+  src: "../fonts/Roboto-Light.woff",
+  variable: "--font-roboto",
+  weight: "100 900",
+});
+
 
 export const metadata = {
   title: "Mapping PM2.5",
@@ -45,7 +51,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${getOrbitron.variable} ${cinzel.variable} ${marcellus.variable} ${poppins.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${getOrbitron.variable} ${cinzel.variable} ${marcellus.variable} ${poppins.variable} ${roboto.variable} antialiased`}
       >
         {children}
       </body>

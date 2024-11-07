@@ -1,4 +1,4 @@
-'use client'; // forces a component to be rendered on the client side only - because of the interactiveness 
+'use client';
 
 import React, { useState } from 'react';
 import { AlertCircle, Wind, Factory, Leaf } from 'lucide-react';
@@ -6,70 +6,113 @@ import { AlertCircle, Wind, Factory, Leaf } from 'lucide-react';
 export default function Introduction() {
   const [activeSection, setActiveSection] = useState(0);
   
-  // Section data - crisis, definition, sources, challenge
   const sections = [
     {
-      icon: <AlertCircle className="w-12 h-12 text-red-500" />,
+      icon: <AlertCircle className="w-12 h-12 text-red-400" />,
       title: "The PM2.5 Crisis",
       content: "Poor air quality has adversely impacted both health and economic development, making it a priority for government bodies and a growing concern for the public."
     },
     {
-      icon: <Wind className="w-12 h-12 text-blue-500" />,
+      icon: <Wind className="w-12 h-12 text-blue-400" />,
       title: "What is PM2.5?",
       content: "PM2.5 refers to fine particulate matter with diameter of less than or equal to 2.5 microns - smaller than a human hair (70 microns). These particles are small enough to penetrate deeply into the lungs and enter the bloodstream."
     },
     {
-      icon: <Factory className="w-12 h-12 text-gray-500" />,
+      icon: <Factory className="w-12 h-12 text-gray-400" />,
       title: "Sources & Impact",
       content: "Vehicle emissions, industrial activities, forest fires, and other forms of combustion are major sources. Prolonged exposure can lead to serious respiratory and cardiovascular diseases."
     },
     {
-      icon: <Leaf className="w-12 h-12 text-green-500" />,
+      icon: <Leaf className="w-12 h-12 text-emerald-400" />,
       title: "The Challenge Ahead",
       content: "Urbanization, industrialization, and increasing energy demands have worsened air quality, particularly in developing regions. Monitoring and visualizing PM2.5 levels is essential for public awareness and policy guidance."
     }
   ];
 
   return (
-    <section className="relative w-full min-h-dvh bg-gradient-to-b from-gray-900 to-gray-800 py-20 px-4 md:px-8 scroll-section" id="introduction">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-200 via-blue-400 to-purple-700 z-0"></div>
-      
-      <div className="relative max-w-7xl mx-auto flex flex-col md:flex-row items-center">
-        {/* Left Side Content - More emphasis and left-aligned */}
-        <div className="w-full md:w-2/5 text-left mb-12 md:mb-0 md:pr-16 z-10">
-          <h2 className="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-            Understanding <br />PM2.5
-          </h2>
-          <p className="text-xl text-gray-300 max-w-md leading-relaxed">
-            Delve into the critical impact of fine particulate matter on global health, environment, and urban ecosystems.
-          </p>
-        </div>
+    <section className="relative w-full min-h-dvh bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-24 px-6 md:px-12 overflow-hidden scroll-section" id="introduction">
+      {/* Animated background elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.1),transparent_50%)]" />
+        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_bottom_right,rgba(147,51,234,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==')] opacity-20" />
+      </div>
 
-        {/* Right Side Cards */}
-        <div className="w-full md:w-3/5 grid grid-cols-1 md:grid-cols-2 gap-6 z-10 mt-14">
-          {sections.map((section, index) => (
-            <div
-              key={index}
-              className="group relative bg-gray-800/60 backdrop-blur-md p-6 rounded-2xl border border-gray-700/50 
-                         transition-all duration-500 ease-in-out transform hover:scale-[1.03] hover:bg-gray-800/80
-                         hover:border-blue-500/50 shadow-xl hover:shadow-2xl"
-              onMouseEnter={() => setActiveSection(index)}
-            >
-              {/* Subtle hover glow effect */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 
-                            opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 blur-2xl" />
-              
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110">
-                  {section.icon}
+      {/* Main content */}
+      <div className="relative max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row gap-12 md:gap-24">
+          {/* Left side - Sticky title */}
+          <div className="md:w-1/3 md:sticky md:top-24 md:h-fit">
+            <h2 className="text-5xl md:text-6xl font-bold mb-6">
+              <span className="inline-block animate-gradient bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent bg-[length:200%_auto]">
+                Understanding PM2.5
+              </span>
+            </h2>
+            <p className="text-lg text-gray-400 leading-relaxed">
+              Explore the critical impact of fine particulate matter on global health, environment, and urban ecosystems.
+            </p>
+          </div>
+
+          {/* Right side - Interactive sections */}
+          <div className="md:w-2/3">
+            <div className="relative flex flex-col space-y-12 md:space-y-24">
+              {sections.map((section, index) => (
+                <div
+                  key={index}
+                  className={`group relative flex flex-col gap-6 transition-all duration-700 
+                            ${activeSection === index ? 'opacity-100 translate-x-0' : 'opacity-50 translate-x-4'}`}
+                  onMouseEnter={() => setActiveSection(index)}
+                >
+                  {/* Icon and title row */}
+                  <div className="flex items-center gap-6">
+                    {/* Icon container with animations */}
+                    <div className="relative">
+                      <div className="absolute -inset-4 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-sm 
+                                  transition-opacity duration-500 group-hover:opacity-100 opacity-0" />
+                      <div className="relative bg-gray-800/50 p-6 rounded-full border border-white/10 
+                                  transform transition-all duration-500 group-hover:scale-110 group-hover:border-white/20
+                                  group-hover:shadow-[0_0_30px_rgba(59,130,246,0.2)]">
+                        {section.icon}
+                      </div>
+                    </div>
+
+                    <h3 className="text-2xl font-semibold text-white tracking-wide 
+                                bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                      {section.title}
+                    </h3>
+                  </div>
+
+                  {/* Content with slide-up animation */}
+                  <div className="ml-24 transform transition-all duration-500 group-hover:translate-y-0 translate-y-2">
+                    <p className="text-gray-400 leading-relaxed text-lg 
+                                transition-all duration-500 group-hover:text-gray-300">
+                      {section.content}
+                    </p>
+                  </div>
+
+                  {/* Decorative line */}
+                  <div className="absolute left-12 top-24 bottom-0 w-px bg-gradient-to-b from-blue-500/20 to-transparent" />
                 </div>
-                <h3 className="text-xl font-semibold text-white tracking-wide">{section.title}</h3>
-              </div>
-              <p className="text-gray-300 leading-relaxed text-base opacity-90">{section.content}</p>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
+      </div>
+
+      {/* Floating particles effect */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white/10 rounded-full animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${10 + Math.random() * 10}s`
+            }}
+          />
+        ))}
       </div>
     </section>
   );
