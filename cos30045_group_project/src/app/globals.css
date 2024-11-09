@@ -8,11 +8,23 @@
   --font-geist-sans: 'GeistSans', sans-serif;
   --font-geist-mono: 'GeistMono', monospace;
   --font-orbitron: 'Orbitron', sans-serif;
-  --font-cinzel: 'Cinzel', serif;
-  --font-marcellus: 'Marcellus', serif;
-  --font-poppins: 'Poppins', sans-serif;
   --font-roboto: 'Roboto', sans-serif;
+  --font-copernicus: 'Copernicus', sans-serif;
 }
+
+/* Hide vertical scrollbar on diff browsers */
+
+/* Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* IE and Edge */
+html {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -72,19 +84,17 @@ body {
 }
 
 .title {
-  font-family: var(--font-roboto); 
+  font-family: var(--font-copernicus); 
   font-size: 4rem; 
-  font-weight: 700;
-  text-align: center;
-  letter-spacing: 3px; 
-  font-style: bold; 
+  font-weight: 500;
   text-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); 
-  font-variant: small-caps; 
   transition: transform 0.3s ease-in-out; 
 }
 
 .title:hover {
   transform: scale(1.05); 
 }
+
+
 
 
