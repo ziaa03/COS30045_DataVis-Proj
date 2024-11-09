@@ -17,41 +17,29 @@ const getOrbitron = localFont({
   weight: "100 900",
 });
 
-const cinzel = localFont({
-  src: "../fonts/Cinzel-VariableFont_wght.woff",
-  variable: "--font-cinzel",
-  weight: "100 900",
-});
-
-const marcellus = localFont({
-  src: "../fonts/MarcellusSC-Regular.woff",
-  variable: "--font-marcellus",
-  weight: "100 900",
-});
-
-const poppins = localFont({
-  src: "../fonts/Poppins-SemiBold.woff",
-  variable: "--font-poppins",
-  weight: "100 900",
-});
-
 const roboto = localFont({
   src: "../fonts/Roboto-Light.woff",
   variable: "--font-roboto",
   weight: "100 900",
 });
 
+const copernicus = localFont({
+  src: "../fonts/Copernicus-MediumItalic.woff",
+  variable: "--font-copernicus",
+  weight: "100 900",
+});
+
 
 export const metadata = {
-  title: "Mapping PM2.5",
-  description: "A visualization project on PM2.5 levels around the world",
+  title: "A World in Haze: Mapping Global Air Pollution",
+  description: "An exploration of air quality through the lens of PM2.5 data worldwide.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${getOrbitron.variable} ${cinzel.variable} ${marcellus.variable} ${poppins.variable} ${roboto.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${getOrbitron.variable} ${roboto.variable} ${copernicus.variable} antialiased`}
       >
         {children}
       </body>

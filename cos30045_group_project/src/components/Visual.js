@@ -34,7 +34,7 @@ export default function Visual() {
       .attr('width', width)
       .attr('height', height)
       .attr('viewBox', [0, 0, width, height])
-      .style('background', 'rgb(17, 24, 39)'); // Dark background
+      .style('background', 'rgb(17, 24, 39)'); 
 
     // Add glow filter
     const defs = svg.append('defs');
