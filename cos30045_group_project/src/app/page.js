@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import Introduction from '../components/Introduction';
 import Objectives from '../components/Objectives';
 import Visual from '../components/Visual';
+import Graph from '../components/Graph';
 import React from 'react';
 
 function MyApp() {
@@ -16,6 +17,7 @@ function MyApp() {
       <Introduction />
       <Objectives />
       <Visual />
+      <Graph />
       <Footer />
     </>
   );
