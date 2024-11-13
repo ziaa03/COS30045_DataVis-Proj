@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
 export default function Graph() {
-    const isFirstRender = useRef(true);
+    // const isFirstRender = useRef(true);
     const [selectedDataset, setSelectedDataset] = useState('population');
     const [dataset, setDataset] = useState(null);
 
@@ -12,11 +12,10 @@ export default function Graph() {
       setSelectedDataset(event.target.value);
     };
 
-    var padding = 100; // padding
+    var padding_x = 100; // padding
+    var padding_y = 50;
     var w = 1000; // width
     var h = 500; // height
-    // var dataset_oecd;
-    // var dataset_sub;
 
   useEffect(() => {
     // If it's not the first render, do nothing
@@ -42,35 +41,19 @@ export default function Graph() {
 
     // Load the CSV file and process the data
     d3.csv('/datasets/oecd_pm25_exposure.csv').then(function(data_oecd) {
-      // d3.csv('/datasets/population.csv').then(function(data_sub) {
-      //   d3.csv('/datasets/respiratory_death_rate.csv').then(function(data_sub) {
-      //     d3.csv('/datasets/cardiovascular_death_rate.csv').then(function(data_sub) {
-        loadData(selectedDataset).then((data_sub) => {
+      loadData(selectedDataset).then((data_sub) => {
 
-            setDataset({ oecd: data_oecd, sub: data_sub });
-            // After loading, render the graph
-            // renderGraph(data_oecd, data_sub);
-      
-            
-      //     }).catch(error => {
-      //       console.error("Error loading CSV data:", error);
-      //     });
-      //   }).catch(error => {
-      //     console.error("Error loading CSV data:", error);
-      //   });
+        setDataset({ oecd: data_oecd, sub: data_sub });
 
-      // }).catch(error => {
-      //     console.error("Error loading CSV data:", error);
-      // });
-    }).catch((err) => {
-      console.error('Error loading data:', err);
+    }).catch((error) => {
+      console.error('Error loading data:', error);
     });
 
     }).catch(error => {
         console.error("Error loading CSV data:", error);
     });
 
-  }, [selectedDataset]);  // The empty dependency array means this effect runs once when the component mounts
+  }, [selectedDataset]);
 
   useEffect(() => {
     if (!dataset) return; // Don't render the graph if no dataset is loaded
@@ -97,49 +80,34 @@ export default function Graph() {
       value: +country_oecd[year]
     }));
 
-    // dataset_oecd = values;
-
     const years_sub = Object.keys(country_sub).filter(key => key !== 'Country');
     const values_sub = years_sub.map(year => ({
       sub_year: +year, 
       sub_value: +country_sub[year]
     }));
 
-    // dataset_sub = values_sub;
-
-
-    // console.log(dataset_sub);
-
-    // console.log(d3.min(dataset, function(d) { return d.value; }))
-    // console.log(d3.max(dataset, function(d) { return d.value; }))
-
-    // console.log(d3.min(dataset, function(d) { return d.year; }))
-    // console.log(d3.max(dataset, function(d) { return d.year; }))
-
     // setting up x Scale
     var xScale = d3.scaleLinear() // Use scaleTime for time-based data like years
         .domain([
-            d3.min(values, function(d) { return d.year; }), // Convert to Date object
-            d3.max(values, function(d) { return d.year; })  // Convert to Date object
+            d3.min(values, function(d) { return d.year; }),
+            d3.max(values, function(d) { return d.year; }) 
         ])
-        .range([padding, w - padding]);
+        .range([padding_x, w - padding_x]);
 
     // setting up y Scale
     var yScale = d3.scaleLinear()
                     .domain([
-                      // d3.min(dataset, function(d) {return d.value; }), 
                       0,
                       d3.max(values, function(d) {return d.value; })
                     ])
-                    .range([h - padding, 10 + padding]);
+                    .range([h - padding_y, 10 + padding_y]);
 
     var yScale_right = d3.scaleLinear()
                     .domain([
-                      // d3.min(dataset_sub, function(d) {return d.sub_value; }), 
                       0,
                       d3.max(values_sub, function(d) {return d.sub_value; })
                     ])
-                    .range([h - padding, 10 + padding]);
+                    .range([h - padding_y, 10 + padding_y]);
 
     // create x axis
     var xAxis = d3.axisBottom()
@@ -175,55 +143,55 @@ export default function Graph() {
         .datum(values)
         .attr("class", "line")
         .attr("d", line)
-        .attr("fill", "none") // Make sure the line is not filled
-        .attr("stroke", "slategrey") // Add stroke color;
+        .attr("fill", "none")
+        .attr("stroke", "slategrey") 
         .attr("stroke-width", 0.5);
 
     var path_sub = svg.append("path")
         .datum(values_sub)
         .attr("class", "line")
         .attr("d", line_sub)
-        .attr("fill", "none") // Make sure the line is not filled
-        .attr("stroke", "red") // Add stroke color;
+        .attr("fill", "none") 
+        .attr("stroke", "red")
         .attr("stroke-width", 0.5);
 
     // Get the total length of the path
     var totalLength = path.node().getTotalLength();
     var totalLength2 = path_sub.node().getTotalLength();
 
-    // Initially, set the stroke-dasharray and stroke-dashoffset to the total length
+    // set the stroke-dasharray and stroke-dashoffset to the total length
     path
-        .attr("stroke-dasharray", totalLength)  // Make the path appear as dashed
-        .attr("stroke-dashoffset", totalLength)  // Set offset to hide the path
+        .attr("stroke-dasharray", totalLength) 
+        .attr("stroke-dashoffset", totalLength)
 
     // Animate the line by transitioning stroke-dashoffset to 0
     path.transition()
-        .duration(2000)  // Duration of the animation in milliseconds
-        .ease(d3.easeLinear)  // Optional: Use linear easing for constant speed
-        .attr("stroke-dashoffset", 0);  // Animate to 0 to make the line appear
-
+        .duration(2000)
+        .ease(d3.easeLinear) 
+        .attr("stroke-dashoffset", 0);
+    
+    // Animate for another line
     path_sub
-      .attr("stroke-dasharray", totalLength2)  // Make the path appear as dashed
-      .attr("stroke-dashoffset", totalLength2)  // Set offset to hide the path
+      .attr("stroke-dasharray", totalLength2) 
+      .attr("stroke-dashoffset", totalLength2)
 
-    // Animate the line by transitioning stroke-dashoffset to 0
     path_sub.transition()
-        .duration(2000)  // Duration of the animation in milliseconds
-        .ease(d3.easeLinear)  // Optional: Use linear easing for constant speed
-        .attr("stroke-dashoffset", 0);  // Animate to 0 to make the line appear
+        .duration(2000) 
+        .ease(d3.easeLinear)  
+        .attr("stroke-dashoffset", 0);
 
     // display the x axis in svg element
     svg.append("g")
-    .attr("transform", "translate(0, " + (h- padding) + ")")
+    .attr("transform", "translate(0, " + (h- padding_y) + ")")
     .call(xAxis);
 
     // display the y axis in the svg element
     svg.append("g")
-        .attr("transform", "translate(" + (padding) + ", 0)")
+        .attr("transform", "translate(" + (padding_x) + ", 0)")
         .call(yAxis);
 
     svg.append("g")
-        .attr("transform", "translate(" + (w - padding) + ", 0)")
+        .attr("transform", "translate(" + (w - padding_x) + ", 0)")
         .call(yAxis_right);
 
     // Add points to the line (optional, for better visibility)
@@ -239,9 +207,9 @@ export default function Graph() {
 
     // Animate the dots: fade them in after the line animation
     dots.transition()
-      .duration(1000)  // Duration for dot animation
-      .delay(function(d, i) { return 1000 + i * 100; })  // Stagger the dots' animation by 100ms each
-      .attr("opacity", 1);  // Fade in the dots
+      .duration(800)
+      .delay(function(d, i) { return 800 + i * 50; })  
+      .attr("opacity", 1); 
 
     dots.on("mouseover", function(event, d) {
         // Change the color of the circle
@@ -261,19 +229,19 @@ export default function Graph() {
             .attr("transform", "translate(" + xPosition + "," + yPosition + ")");
 
         tooltip.append("rect")
-          .attr("x", 5)  // Offset a little from the center
-          .attr("y", -30)  // Position it slightly above the circle
-          .attr("width", 120)  // Set a fixed width for the background
-          .attr("height", 50)  // Height enough for two lines of text
-          .attr("fill", "rgba(0, 0, 0, 0.7)")  // Background color
-          .attr("rx", 4)  // Border radius (rounded corners)
-          .attr("ry", 4)  // Border radius (rounded corners)
-          .style("stroke", "white")  // Optional: add a border color
-          .style("stroke-width", 1);  // Optional: set border thickness
+          .attr("x", 5)  
+          .attr("y", -30)  
+          .attr("width", 120)  
+          .attr("height", 50)  
+          .attr("fill", "rgba(0, 0, 0, 0.7)")
+          .attr("rx", 4)  
+          .attr("ry", 4) 
+          .style("stroke", "white") 
+          .style("stroke-width", 1);  
 
         tooltip.append("text")
-            .attr("x", 10)  // Offset the text a little bit to avoid overlap with the circle
-            .attr("y", -10)  // Position it slightly above the circle
+            .attr("x", 10)  
+            .attr("y", -10) 
             .attr("text-anchor", "start")
             .attr("font-size", "12px")
             .attr("fill", "white")
@@ -281,7 +249,7 @@ export default function Graph() {
 
         tooltip.append("text")
             .attr("x", 10)
-            .attr("y", 5)  // Position it slightly below the first text
+            .attr("y", 5)  
             .attr("text-anchor", "start")
             .attr("font-size", "12px")
             .attr("fill", "white")
@@ -300,76 +268,76 @@ export default function Graph() {
     });
 
     var dots2 = svg.selectAll(".dot2")
-    .data(values_sub)
-    .enter().append("circle")
-    .attr("class", "dot2")
-    .attr("cx", function(d) { return xScale(d.sub_year); })
-    .attr("cy", function(d) { return yScale_right(d.sub_value); })
-    .attr("r", 2.5)
-    .attr("fill", "red")
-    .attr("opacity", 0);
+      .data(values_sub)
+      .enter().append("circle")
+      .attr("class", "dot2")
+      .attr("cx", function(d) { return xScale(d.sub_year); })
+      .attr("cy", function(d) { return yScale_right(d.sub_value); })
+      .attr("r", 2.5)
+      .attr("fill", "red")
+      .attr("opacity", 0);
 
-  // Animate the dots: fade them in after the line animation
-  dots2.transition()
-    .duration(1000)  // Duration for dot animation
-    .delay(function(d, i) { return 1000 + i * 100; })  // Stagger the dots' animation by 100ms each
-    .attr("opacity", 1);  // Fade in the dots
+    // Animate the dots: fade them in after the line animation
+    dots2.transition()
+      .duration(800) 
+      .delay(function(d, i) { return 800 + i * 50; })  
+      .attr("opacity", 1); 
 
-  dots2.on("mouseover", function(event, d) {
-      // Change the color of the circle
-      d3.select(this)
-          .transition()
-          .duration(600)
-          .attr("r", 5)
-          .attr("fill", "orange");
+    dots2.on("mouseover", function(event, d) {
+        // Change the color of the circle
+        d3.select(this)
+            .transition()
+            .duration(600)
+            .attr("r", 5)
+            .attr("fill", "orange");
 
-      // Get the position of the circle (cx and cy are the center positions)
-      var xPosition = xScale(d.sub_year);
-      var yPosition = yScale_right(d.sub_value);
+        // Get the position of the circle (cx and cy are the center positions)
+        var xPosition = xScale(d.sub_year);
+        var yPosition = yScale_right(d.sub_value);
 
-      // Add the tooltip (use multiple text elements instead of <br/>)
-      var tooltip = svg.append("g")
-          .attr("id", "tooltip")
-          .attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+        // Add the tooltip
+        var tooltip = svg.append("g")
+            .attr("id", "tooltip")
+            .attr("transform", "translate(" + xPosition + "," + yPosition + ")");
 
-      tooltip.append("rect")
-        .attr("x", 5)  // Offset a little from the center
-        .attr("y", -30)  // Position it slightly above the circle
-        .attr("width", 120)  // Set a fixed width for the background
-        .attr("height", 50)  // Height enough for two lines of text
-        .attr("fill", "rgba(0, 0, 0, 0.7)")  // Background color
-        .attr("rx", 4)  // Border radius (rounded corners)
-        .attr("ry", 4)  // Border radius (rounded corners)
-        .style("stroke", "white")  // Optional: add a border color
-        .style("stroke-width", 1);  // Optional: set border thickness
+        tooltip.append("rect")
+          .attr("x", 5) 
+          .attr("y", -30) 
+          .attr("width", 120)  
+          .attr("height", 50) 
+          .attr("fill", "rgba(0, 0, 0, 0.7)") 
+          .attr("rx", 4)  
+          .attr("ry", 4)  
+          .style("stroke", "white") 
+          .style("stroke-width", 1); 
 
-      tooltip.append("text")
-          .attr("x", 10)  // Offset the text a little bit to avoid overlap with the circle
-          .attr("y", -10)  // Position it slightly above the circle
-          .attr("text-anchor", "start")
-          .attr("font-size", "12px")
-          .attr("fill", "white")
-          .text("Year: " + d.sub_year);
+        tooltip.append("text")
+            .attr("x", 10)  
+            .attr("y", -10) 
+            .attr("text-anchor", "start")
+            .attr("font-size", "12px")
+            .attr("fill", "white")
+            .text("Year: " + d.sub_year);
 
-      tooltip.append("text")
-          .attr("x", 10)
-          .attr("y", 5)  // Position it slightly below the first text
-          .attr("text-anchor", "start")
-          .attr("font-size", "12px")
-          .attr("fill", "white")
-          .text("Value: " + d.sub_value);
-  })
-  .on("mouseout", function() {
-      // Reset circle color back to original and remove the tooltip
-      d3.select(this)
-          .transition()
-          .duration(600)
-          .attr("r", 2.5)
-          .attr("fill", "red");
+        tooltip.append("text")
+            .attr("x", 10)
+            .attr("y", 5) 
+            .attr("text-anchor", "start")
+            .attr("font-size", "12px")
+            .attr("fill", "white")
+            .text("Value: " + d.sub_value);
+    })
+    .on("mouseout", function() {
+        // Reset circle color back to original and remove the tooltip
+        d3.select(this)
+            .transition()
+            .duration(600)
+            .attr("r", 2.5)
+            .attr("fill", "red");
 
-      // Remove tooltip
-      d3.select("#tooltip").remove();
-  });
+        // Remove tooltip
+        d3.select("#tooltip").remove();
+    });
   }, [dataset]);
 
   return (
@@ -378,13 +346,28 @@ export default function Graph() {
       id="visual"
     >
       <div className="relative">
-        {/* This is just a placeholder; the graph will be rendered inside the div with id="graph" */}
-        <h2 className="text-white">Country</h2>
-        <select value={selectedDataset} onChange={handleChange}>
-          <option value="population">Population</option>
-          <option value="respiratory">Respiratory Death Rate</option>
-          <option value="cardiovascular">Cardiovascular Death Rate</option>
-        </select>
+        <h2 className="text-white w-[100%] text-center text-xl">Country</h2>
+        <div className="w-full flex items-center absolute translate-y-4">
+          <span className="w-[20%] text-white text-xs bg-transparent ml-0 mr-auto">
+            PM2.5 Exposure Level
+          </span>
+          <select
+            className="w-[20%] text-white text-xs bg-transparent hover:border rounded transition duration-150"
+            value={selectedDataset}
+            onChange={handleChange}
+          >
+            <option className="text-black" value="population">
+              Population
+            </option>
+            <option className="text-black" value="respiratory">
+              Respiratory Death Rate
+            </option>
+            <option className="text-black" value="cardiovascular">
+              Cardiovascular Death Rate
+            </option>
+          </select>
+        </div>
+        
         <div id="graph"></div>
       </div>
     </section>
