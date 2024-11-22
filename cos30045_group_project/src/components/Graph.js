@@ -34,27 +34,47 @@ export default function Graph() {
     const loadData = (datasetType) => {
       switch (datasetType) {
         case 'Population':
-          return { data: d3.csv('/datasets/population.csv'), color: '#D3D3D3', title: datasetType};
+          return { 
+            data: d3.csv('/datasets/population.csv'), 
+            color: '#D3D3D3', 
+            title: datasetType, 
+            measurement: ''
+          };
         case 'Respiratory Death Rate':
-          return { data: d3.csv('/datasets/respiratory_death_rate.csv'), color: '#D3D3D3', title: datasetType};
+          return { 
+            data: d3.csv('/datasets/respiratory_death_rate.csv'), 
+            color: '#D3D3D3', 
+            title: datasetType, 
+            measurement: 'per 100k'
+          };
         case 'Cardiovascular Death Rate':
-          return { data: d3.csv('/datasets/cardiovascular_death_rate.csv'), color: '#D3D3D3', title: datasetType};
+          return { 
+            data: d3.csv('/datasets/cardiovascular_death_rate.csv'), 
+            color: '#D3D3D3', 
+            title: datasetType, 
+            measurement: 'per 100k'
+          };
         default:
           // return Promise.reject('Invalid dataset selected');
-          return { data: d3.csv('/datasets/population.csv'), color: '#D3D3D3', title: 'Population'}
+          return { 
+            data: d3.csv('/datasets/population.csv'), 
+            color: '#D3D3D3', 
+            title: 'Population',
+            measurement: ''
+          };
       }
     };
 
     // Load the CSV file and process the data
     d3.csv('/datasets/oecd_pm25_exposure.csv').then(function(data_oecd) {
-      const { data, color, title } = loadData(selectedDataset);
+      const { data, color, title, measurement } = loadData(selectedDataset);
 
       data.then((data_sub) => {
 
-        console.log(data_sub); // process the dataset
-        console.log(color); // use the color
+        // console.log(data_sub); // process the dataset
+        // console.log(color); // use the color
 
-        setDataset({ oecd: data_oecd, sub: data_sub, color: color, title: title });
+        setDataset({ oecd: data_oecd, sub: data_sub, color: color, title: title, measurement: measurement});
 
     }).catch((error) => {
       console.error('Error loading data:', error);
@@ -260,7 +280,7 @@ export default function Graph() {
           .attr("y", -60)  
           .attr("width", 120)  
           .attr("height", 50)  
-          .attr("fill", "rgba(0, 0, 0, 1)")
+          .attr("fill", "rgb(0, 0, 0)")
           .attr("rx", 4)  
           .attr("ry", 4) 
           .style("stroke", "white") 
@@ -269,7 +289,7 @@ export default function Graph() {
 
         tooltip.append("text")
             .attr("x", -100)  
-            .attr("y", -36) 
+            .attr("y", -38) 
             .attr("text-anchor", "start")
             .attr("font-size", "12px")
             .attr("fill", "white")
@@ -277,11 +297,11 @@ export default function Graph() {
 
         tooltip.append("text")
             .attr("x", -100)
-            .attr("y", -24)  
+            .attr("y", -22)  
             .attr("text-anchor", "start")
             .attr("font-size", "12px")
             .attr("fill", "white")
-            .text("Value: " + d.value);
+            .text("Value: " + d.value + " µg/m³");
 
         // Add dotted line to X axis
         svg.append("line")
@@ -357,9 +377,9 @@ export default function Graph() {
           tooltip.append("rect")
             .attr("x", -110)  
             .attr("y", -60)  
-            .attr("width", 120)  
+            .attr("width", 150)  
             .attr("height", 50)  
-            .attr("fill", "rgba(0, 0, 0, 1)")
+            .attr("fill", "rgb(0, 0, 0)")
             .attr("rx", 4)  
             .attr("ry", 4) 
             .style("stroke", "white") 
@@ -368,7 +388,7 @@ export default function Graph() {
   
           tooltip.append("text")
               .attr("x", -100)  
-              .attr("y", -36) 
+              .attr("y", -38) 
               .attr("text-anchor", "start")
               .attr("font-size", "12px")
               .attr("fill", "white")
@@ -376,11 +396,11 @@ export default function Graph() {
   
           tooltip.append("text")
               .attr("x", -100)
-              .attr("y", -24)  
+              .attr("y", -22)  
               .attr("text-anchor", "start")
               .attr("font-size", "12px")
               .attr("fill", "white")
-              .text("Value: " + d.sub_value);
+              .text("Value: " + d.sub_value + ` ${dataset.measurement}`);
 
         // Add dotted line to X axis
         svg.append("line")
@@ -428,11 +448,11 @@ export default function Graph() {
       <div className="relative">
         <h2 className="text-white/70 w-[100%] text-center text-xl">{selectedCountry}</h2>
         <div className="w-full flex items-center absolute translate-y-4">
-          <span className="w-[20%] text-white/70 text-xs bg-transparent ml-0 mr-auto">
-            PM2.5 Exposure Level
+          <span className="w-[20%] text-white/70 text-xs bg-transparent ml-0 mr-auto"  style={{ textDecorationColor: '#00FFFF' }}>
+            PM2.5 Exposure Level (µg/m³)
           </span>
           <select
-            className="w-[20%] text-white/70 text-xs bg-transparent hover:border rounded transition duration-150"
+            className="w-fit text-white/70 text-xs bg-transparent hover:border rounded transition duration-150"
             value={selectedDataset}
             onChange={handleChange}
           >
@@ -440,10 +460,10 @@ export default function Graph() {
               Population
             </option>
             <option className="text-black" value="Respiratory Death Rate">
-              Respiratory Death Rate
+              Respiratory Death Rate (per 100k)
             </option>
             <option className="text-black" value="Cardiovascular Death Rate">
-              Cardiovascular Death Rate
+              Cardiovascular Death Rate (per 100k)
             </option>
           </select>
         </div>
@@ -454,7 +474,7 @@ export default function Graph() {
 
         <div className="w-full flex items-center justify-center space-x-6 mt-12">
         <select
-            className="w-[20%] text-white/70 text-xs bg-transparent hover:border rounded transition duration-150"
+            className="w-fit text-white/70 text-xs bg-transparent hover:border rounded transition duration-150"
             value={selectedCountry}
             onChange={handleCountryChange}
           >
