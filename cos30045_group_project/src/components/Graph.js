@@ -447,19 +447,19 @@ export default function Graph() {
 
         <div className='w-full text-center absolute -translate-y-4'><span>Year</span></div>
 
-        <div class="w-full flex items-center justify-center space-x-6 mt-12">
+        <div className="w-full flex items-center justify-center space-x-6 mt-12">
           <div className='w-fit flex items-center space-x-2'>
-            <svg width="30" height="2" class="">
+            <svg width="30" height="2" className="">
               <rect width="100%" height="100%" fill="#00FFFF" />
             </svg>
-            <span class="text-sm">PM2.5 Exposure Level</span>
+            <span className="text-sm">PM2.5 Exposure Level</span>
           </div>
 
           <div className='w-fit flex items-center space-x-2'>
-            <svg id='sub-legend-line' width="30" height="2" class="">
+            <svg id='sub-legend-line' width="30" height="2" className="">
               <rect  width="100%" height="100%" fill="#00FFFF" />
             </svg>
-            <span id='sub-legend-title' class="text-sm"></span>
+            <span id='sub-legend-title' className="text-sm"></span>
           </div>
           
         </div>

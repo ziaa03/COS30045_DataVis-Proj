@@ -2,11 +2,11 @@
 import './globals.css'; // Make sure to include global styles
 import Navbar from '../components/Navbar';
 import Landing from '../components/Landing';
-import Footer from '../components/Footer';
 import Introduction from '../components/Introduction';
 import Objectives from '../components/Objectives';
 import Visual from '../components/Visual';
 import Graph from '../components/Graph';
+import Footer from '../components/Footer';
 import React from 'react';
 
 function MyApp() {

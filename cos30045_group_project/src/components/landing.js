@@ -30,7 +30,7 @@ export default function Landing() {
           playsInline
           style={{ filter: 'brightness(0.5) saturate(1.2)' }}
         >
-          <source src='/videos/hands.mp4' type='video/mp4' />
+          <source src='/videos/world.mp4' type='video/mp4' />
         </video>
       </div>
 
@@ -49,9 +49,9 @@ export default function Landing() {
               transition={{ duration: 1, delay: 0.2 }}
               className="mb-12"
             >
-              <h1 className="title text-5xl lg:text-7xl xl:text-8xl text-white leading-tight font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">
+              <h1 className="title text-4xl lg:text-7xl xl:text-7xl text-white leading-tight font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">
                 A World in Haze:
-                <span className="block text-3xl lg:text-4xl xl:text-5xl mt-4 font-light text-white/90">
+                <span className="block text-3xl lg:text-4xl xl:text-4xl mt-4 font-light text-white/90">
                   Mapping Global Air Pollution
                 </span>
               </h1>
@@ -65,7 +65,7 @@ export default function Landing() {
                 transition={{ duration: 1, delay: 0.4 }}
                 className="space-y-8"
               >
-                <p className="text-xl lg:text-2xl text-white/90 leading-relaxed">
+                <p className="text-xl lg:text-xl text-white/90 leading-relaxed">
                 In a world where clean air is essential, millions face an unseen challenge. Across cities, a quiet struggle unfolds—one that affects us all, no matter where we live.
                 </p>
                 <div className="flex items-center space-x-4">
@@ -82,7 +82,7 @@ export default function Landing() {
                 transition={{ duration: 1, delay: 0.6 }}
                 className="space-y-8"
               >
-                <p className="text-xl lg:text-2xl text-white/90 leading-relaxed">
+                <p className="text-xl lg:text-xl text-white/90 leading-relaxed">
                 Together, we can make a difference and create a healthier environment. This isn’t just data—it’s about the air we all breathe and the responsibility we share for the future.
                 </p>
               </motion.div>
