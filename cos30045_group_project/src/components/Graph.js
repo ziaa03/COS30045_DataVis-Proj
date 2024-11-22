@@ -6,10 +6,15 @@ import * as d3 from 'd3';
 export default function Graph() {
     // const isFirstRender = useRef(true);
     const [selectedDataset, setSelectedDataset] = useState('population');
+    const [selectedCountry, setSelectedCountry] = useState('Australia');
     const [dataset, setDataset] = useState(null);
 
     const handleChange = (event) => {
       setSelectedDataset(event.target.value);
+    };
+
+    const handleCountryChange = (event) => {
+      setSelectedCountry(event.target.value);
     };
 
     var padding_x = 120; // padding
@@ -71,11 +76,11 @@ export default function Graph() {
     const { oecd, sub, color, title } = dataset;
 
     // Find the row for "Japan"
-    const country_oecd = oecd.find(d => d['Reference area'] === 'Australia');
-    const country_sub = sub.find(d => d['Country'] === 'Australia');
+    const country_oecd = oecd.find(d => d['Reference area'] === selectedCountry);
+    const country_sub = sub.find(d => d['Country'] === selectedCountry);
 
     if (!country_oecd && !country_sub) {
-      console.error("No data found for Japan");
+      console.error(`No data found for ${selectedCountry}`);
       return;
     }
 
@@ -413,7 +418,7 @@ export default function Graph() {
         // Remove the dotted lines
         svg.selectAll("line").remove();
     });
-  }, [dataset]);
+  }, [dataset, selectedCountry]);
 
   return (
     <section 
@@ -421,7 +426,7 @@ export default function Graph() {
       id="visual"
     >
       <div className="relative">
-        <h2 className="text-white/70 w-[100%] text-center text-xl">Country</h2>
+        <h2 className="text-white/70 w-[100%] text-center text-xl">{selectedCountry}</h2>
         <div className="w-full flex items-center absolute translate-y-4">
           <span className="w-[20%] text-white/70 text-xs bg-transparent ml-0 mr-auto">
             PM2.5 Exposure Level
@@ -448,6 +453,19 @@ export default function Graph() {
         <div className='w-full text-center absolute -translate-y-4'><span>Year</span></div>
 
         <div className="w-full flex items-center justify-center space-x-6 mt-12">
+        <select
+            className="w-[20%] text-white/70 text-xs bg-transparent hover:border rounded transition duration-150"
+            value={selectedCountry}
+            onChange={handleCountryChange}
+          >
+            <option className="text-black" value="Australia">
+              Australia
+            </option>
+            <option className="text-black" value="Japan">
+              Japan
+            </option>
+            {/* Add more countries as needed */}
+          </select>
           <div className='w-fit flex items-center space-x-2'>
             <svg width="30" height="2" className="">
               <rect width="100%" height="100%" fill="#00FFFF" />
