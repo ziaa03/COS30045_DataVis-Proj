@@ -20,17 +20,20 @@ export default function Visual() {
   const [worldData, setWorldData] = useState(null);
 
   useEffect(() => {
-    // Load TopoJSON data
-    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    // load TopoJSON data
+    fetch('/json_files/countries-110m.json')
       .then(response => response.json())
       .then(data => setWorldData(data));
 
+    // load all csv data
+    // population, pm25, cardiovascular, respiratory
     Promise.all([
       d3.csv('/datasets/population.csv'),
       d3.csv('/datasets/oecd_pm25_exposure.csv'),
       d3.csv('/datasets/cardiovascular_death_rate.csv'),
       d3.csv('/datasets/respiratory_death_rate.csv')
     ]).then(([populationData, pm25Data, cardioData, respData]) => {
+      // convert raw csv data into structured maps keyed by year and country 
       const processDataWithYears = (data, keyName) => {
         const yearMap = new Map();
         const years = new Set();
@@ -54,10 +57,11 @@ export default function Visual() {
       };
 
       const populationYearData = processDataWithYears(populationData, 'Country');
-      const pm25YearData = processDataWithYears(pm25Data, 'Reference area');
+      const pm25YearData = processDataWithYears(pm25Data, 'Country');
       const cardioYearData = processDataWithYears(cardioData, 'Country');
       const respYearData = processDataWithYears(respData, 'Country');
 
+      // finds the intersection of available years across all datasets 
       const commonYears = pm25YearData.years.filter(year => 
         populationYearData.years.includes(year) &&
         cardioYearData.years.includes(year) &&
@@ -76,6 +80,7 @@ export default function Visual() {
     });
   }, []);
 
+  // updates data on year change (selected)
   useEffect(() => {
     if (!selectedYear || !yearData.pm25) return;
     
