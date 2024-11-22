@@ -8,6 +8,7 @@ export default function Graph() {
     const [selectedDataset, setSelectedDataset] = useState('population');
     const [selectedCountry, setSelectedCountry] = useState('Australia');
     const [dataset, setDataset] = useState(null);
+    const [width, setWidth] = useState(window.innerWidth);
 
     const handleChange = (event) => {
       setSelectedDataset(event.target.value);
@@ -19,8 +20,20 @@ export default function Graph() {
 
     var padding_x = 120; // padding
     var padding_y = 50;
-    var w = 1000; // width
+    var w = 1100; // width
     var h = 400; // height
+
+    useEffect(() => {
+      // Update width state on resize
+      const handleResize = () => {
+          setWidth(window.innerWidth);
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => {
+          window.removeEventListener('resize', handleResize);
+      };
+  }, []);
 
   useEffect(() => {
     // If it's not the first render, do nothing
@@ -36,31 +49,31 @@ export default function Graph() {
         case 'Population':
           return { 
             data: d3.csv('/datasets/population.csv'), 
-            color: '#D3D3D3', 
+            color: '#FFA500', 
             title: datasetType, 
             measurement: ''
           };
         case 'Respiratory Death Rate':
           return { 
             data: d3.csv('/datasets/respiratory_death_rate.csv'), 
-            color: '#D3D3D3', 
+            color: '#FFA500', 
             title: datasetType, 
             measurement: 'per 100k'
           };
         case 'Cardiovascular Death Rate':
           return { 
             data: d3.csv('/datasets/cardiovascular_death_rate.csv'), 
-            color: '#D3D3D3', 
+            color: '#FFA500', 
             title: datasetType, 
             measurement: 'per 100k'
           };
         default:
           // return Promise.reject('Invalid dataset selected');
           return { 
-            data: d3.csv('/datasets/population.csv'), 
-            color: '#D3D3D3', 
-            title: 'Population',
-            measurement: ''
+            data: d3.csv('/datasets/respiratory_death_rate.csv'), 
+            color: '#FFA500', 
+            title: datasetType, 
+            measurement: 'per 100k'
           };
       }
     };
@@ -117,6 +130,8 @@ export default function Graph() {
       sub_value: +country_sub[year]
     }));
 
+    const w = width - padding_x * 2; // Use screen width minus padding
+
     // setting up x Scale
     var xScale = d3.scaleLinear() // Use scaleTime for time-based data like years
         .domain([
@@ -160,6 +175,11 @@ export default function Graph() {
                 .x(function(d) { return xScale(d.year); })
                 .y(function(d) { return yScale(d.value); });
 
+    var area = d3.area()
+            .x(function(d) { return xScale(d.year); })
+            .y0(function() { return yScale.range()[0]; })
+            .y1(function(d) { return yScale(d.value); })
+
     var line_sub = d3.line()
                 .x(function(d) { return xScale(d.sub_year); })
                 .y(function(d) { return yScale_right(d.sub_value); });
@@ -186,8 +206,8 @@ export default function Graph() {
     var path = svg.append("path")
         .datum(values)
         .attr("class", "line")
-        .attr("d", line)
-        .attr("fill", "none")
+        .attr("d", area)
+        .attr("fill", "rgba(0, 255, 255, 0.2)")
         .attr("stroke", "#00FFFF") 
         .attr("stroke-width", 0.5);
 
@@ -197,7 +217,7 @@ export default function Graph() {
         .attr("d", line_sub)
         .attr("fill", "none") 
         .attr("stroke", color)
-        .attr("stroke-width", 0.5);
+        .attr("stroke-width", 1.5);
 
     // Get the total length of the path
     var totalLength = path.node().getTotalLength();
@@ -247,7 +267,7 @@ export default function Graph() {
       .attr("class", "dot")
       .attr("cx", function(d) { return xScale(d.year); })
       .attr("cy", function(d) { return yScale(d.value); })
-      .attr("r", 2.5)
+      .attr("r", 2)
       .style("z-index", 98) 
       .attr("fill", "#00FFFF")
       .attr("opacity", 0);
@@ -263,8 +283,8 @@ export default function Graph() {
         d3.select(this)
             .transition()
             .duration(600)
-            .attr("r", 5)
-            .attr("fill", "orange");
+            .attr("r", 6)
+            .attr("fill", "red");
 
         // Get the position of the circle (cx and cy are the center positions)
         var xPosition = xScale(d.year);
@@ -308,22 +328,32 @@ export default function Graph() {
           .attr("x1", xPosition)
           .attr("y1", yPosition + 5)
           .attr("x2", xPosition)
-          .attr("y2", yScale.range()[0]) // Y axis position
+          .attr("y2", yPosition + 5) // Y axis position
           .attr("stroke", "grey")
           .attr("z-index", 0)
           .style("stroke-dasharray", "4,4") // Dotted line style
-          .attr("stroke-width", 1);
+          .attr("stroke-width", 1)
+          .transition()
+          .duration(500)
+          .attr("x2", xPosition)
+          .attr("y2", yScale.range()[0]) // Y axis position
+          .ease(d3.easeLinear);
 
         // Add dotted line to Y axis
         svg.append("line")
             .attr("x1", xPosition - 5)
             .attr("y1", yPosition)
-            .attr("x2", xScale.range()[0]) // X axis position
+            .attr("x2", xPosition - 5) // X axis position
             .attr("y2", yPosition)
             .attr("stroke", "grey")
             .attr("z-index", 0)
             .attr("stroke-dasharray", "4,4") // Dotted line style
-            .attr("stroke-width", 1);
+            .attr("stroke-width", 1)
+            .transition()
+            .duration(500)
+            .attr("x2", xScale.range()[0])
+            .attr("y2", yPosition) // Y axis position
+            .ease(d3.easeLinear);
     })
     .on("mouseout", function() {
         // Reset circle color back to original and remove the tooltip
@@ -362,8 +392,8 @@ export default function Graph() {
         d3.select(this)
             .transition()
             .duration(600)
-            .attr("r", 5)
-            .attr("fill", "orange");
+            .attr("r", 6)
+            .attr("fill", "violet");
 
         // Get the position of the circle (cx and cy are the center positions)
         var xPosition = xScale(d.sub_year);
@@ -407,22 +437,32 @@ export default function Graph() {
           .attr("x1", xPosition)
           .attr("y1", yPosition + 5)
           .attr("x2", xPosition)
-          .attr("y2", yScale_right.range()[0]) // Y axis position
+          .attr("y2", yPosition + 5) // Y axis position
           .attr("stroke", "grey")
           .style("z-index", 0)
           .attr("stroke-dasharray", "4,4") // Dotted line style
-          .attr("stroke-width", 1);
+          .attr("stroke-width", 1)
+          .transition()
+          .duration(500)
+          .attr("x2", xPosition)
+          .attr("y2", yScale_right.range()[0]) // Y axis position
+          .ease(d3.easeLinear);
 
         // Add dotted line to Y axis
         svg.append("line")
             .attr("x1", xPosition + 5)
             .attr("y1", yPosition)
-            .attr("x2", xScale.range()[1]) // X axis position
+            .attr("x2", xPosition + 5) // X axis position
             .attr("y2", yPosition)
             .attr("stroke", "grey")
             .style("z-index", 0)
             .attr("stroke-dasharray", "4,4") // Dotted line style
-            .attr("stroke-width", 1);
+            .attr("stroke-width", 1)
+            .transition()
+            .duration(500)
+            .attr("x2", xScale.range()[1]) // X axis position
+            .attr("y2", yPosition)
+            .ease(d3.easeLinear);
     })
     .on("mouseout", function() {
         // Reset circle color back to original and remove the tooltip
@@ -438,7 +478,7 @@ export default function Graph() {
         // Remove the dotted lines
         svg.selectAll("line").remove();
     });
-  }, [dataset, selectedCountry]);
+  }, [dataset, selectedCountry, width]);
 
   return (
     <section 
@@ -446,7 +486,7 @@ export default function Graph() {
       id="visual"
     >
       <div className="relative">
-        <h2 className="text-white/70 w-[100%] text-center text-xl">{selectedCountry}</h2>
+        <h2 className="text-white/70 w-[100%] text-center text-xl">Country: {selectedCountry}</h2>
         <div className="w-full flex items-center absolute translate-y-4">
           <span className="w-[20%] text-white/70 text-xs bg-transparent ml-0 mr-auto"  style={{ textDecorationColor: '#00FFFF' }}>
             PM2.5 Exposure Level (µg/m³)
@@ -456,15 +496,16 @@ export default function Graph() {
             value={selectedDataset}
             onChange={handleChange}
           >
-            <option className="text-black" value="Population">
-              Population
-            </option>
             <option className="text-black" value="Respiratory Death Rate">
               Respiratory Death Rate (per 100k)
             </option>
             <option className="text-black" value="Cardiovascular Death Rate">
               Cardiovascular Death Rate (per 100k)
             </option>
+            <option className="text-black" value="Population">
+              Population
+            </option>
+            
           </select>
         </div>
         
