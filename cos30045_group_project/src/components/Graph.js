@@ -109,7 +109,7 @@ export default function Graph() {
     const { oecd, sub, color, title } = dataset;
 
     // Find the row for "Japan"
-    const country_oecd = oecd.find(d => d['Reference area'] === selectedCountry);
+    const country_oecd = oecd.find(d => d['Country'] === selectedCountry);
     const country_sub = sub.find(d => d['Country'] === selectedCountry);
 
     if (!country_oecd && !country_sub) {
@@ -118,7 +118,7 @@ export default function Graph() {
     }
 
     // Extract years and corresponding values for Japan
-    const years = Object.keys(country_oecd).filter(key => key !== 'Reference area');
+    const years = Object.keys(country_oecd).filter(key => key !== 'Country');
     const values = years.map(year => ({
       year: +year, 
       value: +country_oecd[year]
