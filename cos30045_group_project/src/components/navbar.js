@@ -38,7 +38,6 @@ export default function Navbar() {
                 { href: "/#introduction", text: "Introduction" },
                 { href: "/#objectives", text: "Aim & Objectives" },
                 { href: "/#visual", text: "Data Visual" },
-                { href: "/#sources", text: "Sources" }
               ].map((item, index) => (
                 <li key={index} className="relative group">
                   {/* Glow effect container */}

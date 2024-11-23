@@ -1,5 +1,6 @@
 // /pages/about.js
 'use client';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -8,12 +9,12 @@ import ProfileCard from '../../components/ProfileCard';
 const About = () => {
   const userData = [
     {
-      profilePicture: '/images/pfp1.jpeg', // Replace with a dynamic URL
+      profilePicture: '/images/travis_pfp.jpg', // Replace with a dynamic URL
       name: 'Chak Joo TAN',
       links: [
-        { label: 'LinkedIn', url: 'https://www.linkedin.com/in/johndoe', image: '/images/icons/linkedin.png' },
-        { label: 'GitHub', url: 'https://github.com/johndoe', image: '/images/icons/github.png'  },
-        { label: 'Gmail', url: 'https://johndoe.com', image: '/images/icons/gmail.png'  },
+        { label: 'LinkedIn', url: 'https://www.linkedin.com/in/chak-joo-tan-931638290/', image: '/images/icons/linkedin.png' },
+        { label: 'GitHub', url: 'https://github.com/cj-travis', image: '/images/icons/github.png'  },
+        { label: 'Gmail', url: 'mailto:tanchakjoo27@gmail.com', image: '/images/icons/gmail.png'  },
       ],
     },
     {
@@ -26,25 +27,6 @@ const About = () => {
       ],
     }
   ];
-  const userData1 = {
-    profilePicture: '/images/pfp1.jpeg', // Replace with a dynamic URL
-    name: 'Chak Joo TAN',
-    links: [
-      { label: 'LinkedIn', url: 'https://www.linkedin.com/in/johndoe', image: '/images/icons/linkedin.png' },
-      { label: 'GitHub', url: 'https://github.com/johndoe', image: '/images/icons/github.png'  },
-      { label: 'Gmail', url: 'https://johndoe.com', image: '/images/icons/gmail.png'  },
-    ],
-  };
-
-  const userData2 = {
-    profilePicture: '/images/pfp2.jpeg', // Replace with a dynamic URL
-    name: 'Zia Adam Chun Ing TAN',
-    links: [
-      { label: 'LinkedIn', url: 'https://www.linkedin.com/in/johndoe', image: '/images/icons/linkedin.png' },
-      { label: 'GitHub', url: 'https://github.com/johndoe', image: '/images/icons/github.png'  },
-      { label: 'Gmail', url: 'https://johndoe.com', image: '/images/icons/gmail.png'  },
-    ],
-  };
 
   const texts = [
     {
@@ -64,7 +46,7 @@ const About = () => {
         <div className='pt-[100px] w-full h-full flex align-center justify-center leading-8'>
           <div className='w-[70%] md:gap-10'>
             <div className=''> {/* Larger column */}
-              <h1 className="text-4xl mb-4 duration-500 relative">Project & Contributors</h1>
+              <h1 className="text-4xl mb-4 duration-500 relative">Project, Contributors & References</h1>
               {texts.map((text, index) => {
                 return (
                   <motion.div
@@ -73,32 +55,112 @@ const About = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, delay: 0.2+(index/10) }}
                   >
-                    <p className="mb-2 text-sm leading-6">{text.para}</p>
+                    <p className="mb-2 text-sm leading-6 text-slate-300 text-justify">{text.para}</p>
                   </motion.div>
                 );
               })}
               
             </div>
 
-            <div className='sm:flex w-full justify-end mt-4 lg:mt-0 mb-12 lg:mb-0'> {/* Smaller column */}
-              {userData.map((user, index) => {
-                return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, delay: 0.2+(index/10) }}
+            <div className='grid grid-cols-1 gap-6 mt-6 lg:mt-10 mb-12 lg:grid-cols-12'> {/* Smaller column */}
+              
+              <div className='grid-cols-1 lg:col-span-8 xl:col-span-6'>
+                <div className='md:flex w-full justify-center'>
+                  {userData.map((user, index) => {
+                    return (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 0.2+(index/10) }}
+                      >
+                        <div className='m-1'>
+                          <ProfileCard
+                              profilePicture={user.profilePicture}
+                              name={user.name}
+                              links={user.links}
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>  
+                
+              </div>
+
+              <div className='grid-cols-1 lg:col-span-4 xl:col-span-6'>
+                <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 0.2 }}>
+                <h1 className="text-xl mb-2 duration-500 relative">OECD: </h1><hr/>
+                <p className="mt-2 text-sm leading-6">
+                  <Link 
+                    href='https://www.oecd-ilibrary.org/environment/data/air-quality-and-health/exposure-to-pm2-5-fine-particles-countries-and-regions_96171c76-en?parent=http%3A%2F%2Finstance.metastore.ingenta.com%2Fcontent%2Fcollection%2Fenv-data-en'
+                    target='_blank'
+                    className='text-slate-400 hover:text-slate-100 duration-300'
                   >
-                    <div className='m-1'>
-                      <ProfileCard
-                          profilePicture={user.profilePicture}
-                          name={user.name}
-                          links={user.links}
-                      />
-                    </div>
-                  </motion.div>
-                );
-              })}
+                    PM2.5 Exposure Levels - Countires and Regions
+                  </Link>
+                </p>
+                <br/>
+                </motion.div>
+                <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 0.4}}>
+                <h1 className="text-xl mb-2 duration-500 relative">World Bank Group: </h1><hr/>
+                <p className="mt-2 text-sm leading-6">
+                  
+                  <Link 
+                    href='https://data.worldbank.org/indicator/EN.ATM.PM25.MC.M3'
+                    target='_blank'
+                    className='text-slate-400 hover:text-slate-100 duration-300'
+                  >
+                    PM2.5 Air Pollution
+                  </Link>
+                </p>
+                <p className="mt-2 text-sm leading-6">
+                  
+                  <Link 
+                    href='https://data.worldbank.org/indicator/SP.POP.TOTL'
+                    target='_blank'
+                    className='text-slate-400 hover:text-slate-100 duration-300'
+                  >
+                    Population - Countries and Regions
+                  </Link>
+                </p>
+                <br/>
+                </motion.div>
+                <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 0.6}}>
+                <h1 className="text-xl mb-2 duration-500 relative">Our World in Data: </h1><hr/>
+                <p className="mt-2 text-sm leading-6">
+                  
+                  <Link 
+                    href='https://ourworldindata.org/grapher/cardiovascular-disease-death-rates?tab=table'
+                    target='_blank'
+                    className='text-slate-400 hover:text-slate-100 duration-300'
+                  >
+                    Death rate from cardiovascular diseases
+                  </Link>
+                </p>
+                <p className="mt-2 text-sm leading-6">
+                  
+                  <Link 
+                    href='https://ourworldindata.org/grapher/respiratory-disease-death-rate?tab=table'
+                    target='_blank'
+                    className='text-slate-400 hover:text-slate-100 duration-300'
+                  >
+                    Chronic respiratory diseases death rate
+                  </Link>
+                </p>
+                <br/>
+                </motion.div>
+              </div>
+              
               
             </div>
           </div> 
