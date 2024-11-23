@@ -3,26 +3,40 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
-export default function Graph() {
+// parent component - graphmodal.js 
+// receive props from parent component 
+export default function Graph({ selectedCountry }) {
     // const isFirstRender = useRef(true);
     const [selectedDataset, setSelectedDataset] = useState('population');
-    const [selectedCountry, setSelectedCountry] = useState('Australia');
+    // const [selectedCountry, setSelectedCountry] = useState('Australia');
+    if (!selectedCountry || !selectedDataset) {
+      return <div className="text-white text-center">Missing required data</div>;
+  }
+
     const [dataset, setDataset] = useState(null);
-    const [width, setWidth] = useState(window.innerWidth);
+    // const [width, setWidth] = useState(window.innerWidth);   
+    // cant work as there is not browser window available when nextjs first builds the page on the server 
+
+    console.log('Current graph:', { selectedCountry, selectedDataset });
+    
+    // replace with: 
+    // setting initial width state
+    const [width, setWidth] = useState(1100);    
 
     const handleChange = (event) => {
       setSelectedDataset(event.target.value);
     };
 
-    const handleCountryChange = (event) => {
-      setSelectedCountry(event.target.value);
-    };
+    // const handleCountryChange = (event) => {
+    //   setSelectedCountry(event.target.value);
+    // };
 
     var padding_x = 120; // padding
     var padding_y = 50;
     var w = 1100; // width
     var h = 400; // height
 
+    // code only runs in the browser, after the component mounts 
     useEffect(() => {
       // Update width state on resize
       const handleResize = () => {
@@ -47,6 +61,7 @@ export default function Graph() {
     const loadData = (datasetType) => {
       switch (datasetType) {
         case 'Population':
+        case 'population':  // Add lowercase case
           return { 
             data: d3.csv('/datasets/population.csv'), 
             color: '#FFA500', 
@@ -54,6 +69,7 @@ export default function Graph() {
             measurement: ''
           };
         case 'Respiratory Death Rate':
+        case 'respiratory':  // Add case for metric from map
           return { 
             data: d3.csv('/datasets/respiratory_death_rate.csv'), 
             color: '#FFA500', 
@@ -61,6 +77,7 @@ export default function Graph() {
             measurement: 'per 100k'
           };
         case 'Cardiovascular Death Rate':
+        case 'cardiovascular':  // Add case for metric from map
           return { 
             data: d3.csv('/datasets/cardiovascular_death_rate.csv'), 
             color: '#FFA500', 
@@ -68,7 +85,6 @@ export default function Graph() {
             measurement: 'per 100k'
           };
         default:
-          // return Promise.reject('Invalid dataset selected');
           return { 
             data: d3.csv('/datasets/respiratory_death_rate.csv'), 
             color: '#FFA500', 
@@ -505,7 +521,6 @@ export default function Graph() {
             <option className="text-black" value="Population">
               Population
             </option>
-            
           </select>
         </div>
         
@@ -514,19 +529,7 @@ export default function Graph() {
         <div className='w-full text-center absolute -translate-y-4'><span>Year</span></div>
 
         <div className="w-full flex items-center justify-center space-x-6 mt-12">
-        <select
-            className="w-fit text-white/70 text-xs bg-transparent hover:border rounded transition duration-150"
-            value={selectedCountry}
-            onChange={handleCountryChange}
-          >
-            <option className="text-black" value="Australia">
-              Australia
-            </option>
-            <option className="text-black" value="Japan">
-              Japan
-            </option>
-            {/* Add more countries as needed */}
-          </select>
+        
           <div className='w-fit flex items-center space-x-2'>
             <svg width="30" height="2" className="">
               <rect width="100%" height="100%" fill="#00FFFF" />

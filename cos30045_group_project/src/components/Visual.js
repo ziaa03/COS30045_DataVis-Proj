@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
+import GraphModal from './GraphModal';
 
 export default function Visual() {
   const svgRef = useRef(null);
@@ -19,14 +20,17 @@ export default function Visual() {
   const [availableYears, setAvailableYears] = useState([]);
   const [worldData, setWorldData] = useState(null);
 
+  // states for graph modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCountryData, setSelectedCountryData] = useState(null);
+
   useEffect(() => {
     // load TopoJSON data
     fetch('/json_files/countries-110m.json')
       .then(response => response.json())
       .then(data => setWorldData(data));
 
-    // load all csv data
-    // population, pm25, cardiovascular, respiratory
+    // load all csv data then processsed to create a structured data map
     Promise.all([
       d3.csv('/datasets/population.csv'),
       d3.csv('/datasets/oecd_pm25_exposure.csv'),
@@ -34,6 +38,7 @@ export default function Visual() {
       d3.csv('/datasets/respiratory_death_rate.csv')
     ]).then(([populationData, pm25Data, cardioData, respData]) => {
       // convert raw csv data into structured maps keyed by year and country 
+      // and extract the list of available years for the data
       const processDataWithYears = (data, keyName) => {
         const yearMap = new Map();
         const years = new Set();
@@ -147,18 +152,33 @@ export default function Visual() {
     // Draw countries
     const countries = topojson.feature(worldData, worldData.objects.countries);
     g.selectAll('path.country')
-      .data(countries.features)
-      .join('path')
-      .attr('class', 'country')
-      .attr('d', path)
-      .attr('fill', d => {
-        const value = allData[metric].get(d.properties.name);
-        return value ? colorScale(value) : 'rgb(55, 65, 81)';
-      })
-      .attr('stroke', 'rgb(147, 197, 253)')
-      .attr('stroke-width', '0.5')
-      .on('mouseover', handleMouseOver)
-      .on('mouseout', handleMouseOut);
+  .data(countries.features)
+  .join('path')
+  .attr('class', 'country')
+  .attr('d', path)
+  .attr('fill', d => {
+    const value = allData[metric].get(d.properties.name);
+    return value ? colorScale(value) : 'rgb(55, 65, 81)';
+  })
+  .attr('stroke', 'rgb(147, 197, 253)')
+  .attr('stroke-width', '0.5')
+  .on('mouseover', handleMouseOver)
+  .on('mouseout', handleMouseOut)
+  .on('click', (event, d) => {
+    const countryName = d.properties.name;
+    if (countryName && allData[metric].has(countryName)) {
+      setSelectedCountryData({
+        name: countryName,
+        population: allData.population.get(countryName),
+        pm25: allData.pm25.get(countryName),
+        cardiovascular: allData.cardiovascular.get(countryName),
+        respiratory: allData.respiratory.get(countryName)
+      });
+      setIsModalOpen(true);
+    } else {
+      console.log('No data available for:', countryName);
+    }
+});
 
     // Draw legend
     drawLegend(svg, colorScale, maxValue, width, height);
@@ -212,62 +232,104 @@ export default function Visual() {
   };
 
   const drawLegend = (svg, colorScale, maxValue, width, height) => {
-    const legendWidth = 300;
-    const legendHeight = 20;
-    const legendPosition = { x: 50, y: height - 100 };
+    // Increased dimensions and adjusted positioning
+    const legendWidth = 400;  // Made wider
+    const legendHeight = 25;   // Made taller
+    const legendPosition = { 
+      x: 50, 
+      y: height - 120  // Moved up slightly
+    };
 
     const legendScale = d3.scaleLinear()
       .domain([0, maxValue])
       .range([0, legendWidth]);
 
+    // More ticks for finer granularity
     const legendAxis = d3.axisBottom(legendScale)
-      .ticks(5)
-      .tickFormat(d => d3.format('.1f')(d));
+      .ticks(8)  // Increased number of ticks
+      .tickFormat(d => {
+        // Format numbers with appropriate units
+        if (d >= 1000) {
+          return d3.format('.1f')(d/1000) + 'k';
+        }
+        return d3.format('.1f')(d);
+      });
 
     const legendContainer = svg.append('g')
       .attr('transform', `translate(${legendPosition.x}, ${legendPosition.y})`);
 
-    // Legend background
+    // Enhanced background with gradient
     legendContainer.append('rect')
-      .attr('x', -10)
-      .attr('y', -10)
-      .attr('width', legendWidth + 20)
-      .attr('height', legendHeight + 40)
-      .attr('fill', 'rgba(0, 0, 0, 0.5)')
-      .attr('rx', 5);
+      .attr('x', -15)
+      .attr('y', -30)
+      .attr('width', legendWidth + 30)
+      .attr('height', legendHeight + 60)
+      .attr('fill', 'rgba(0, 0, 0, 0.7)')  // Darker background
+      .attr('rx', 8)  // Rounded corners
+      .attr('filter', 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3))');  // Shadow effect
 
-    // Legend title
+    // Enhanced title with subtitle
     legendContainer.append('text')
       .attr('x', 0)
-      .attr('y', -15)
+      .attr('y', -10)
       .attr('fill', 'white')
       .attr('font-size', '14px')
-      .text(`${getMetricLabel()} (${getMetricUnit().trim()})`);
+      .attr('font-weight', 'bold')  // Made bold
+      .text(`${getMetricLabel()}`);
 
-    // Legend gradient
+    // Add subtitle with units
+    legendContainer.append('text')
+      .attr('x', legendWidth)
+      .attr('y', -10)
+      .attr('text-anchor', 'end')
+      .attr('fill', 'rgba(255, 255, 255, 0.7)')  // Slightly transparent
+      .attr('font-size', '12px')
+      .text(`(${getMetricUnit().trim()})`);
+
+    // Enhanced gradient
     const defs = svg.append('defs');
     const linearGradient = defs.append('linearGradient')
-      .attr('id', 'legend-gradient');
+      .attr('id', 'legend-gradient')
+      .attr('gradientUnits', 'userSpaceOnUse')
+      .attr('x1', '0%')
+      .attr('x2', '100%');
 
-    const legendStops = Array.from({ length: 11 }, (_, i) => i / 10);
+    // More gradient stops for smoother transition
+    const legendStops = Array.from({ length: 20 }, (_, i) => i / 19);
     linearGradient.selectAll('stop')
       .data(legendStops)
       .join('stop')
       .attr('offset', d => `${d * 100}%`)
-      .attr('stop-color', d => colorScale(d * maxValue));
+      .attr('stop-color', d => colorScale(d * maxValue))
+      .attr('stop-opacity', 0.9);  // Slight transparency
 
+    // Main legend rectangle with border
     legendContainer.append('rect')
       .attr('width', legendWidth)
       .attr('height', legendHeight)
-      .style('fill', 'url(#legend-gradient)');
+      .style('fill', 'url(#legend-gradient)')
+      .style('stroke', 'rgba(255, 255, 255, 0.2)')  // Subtle border
+      .style('stroke-width', 1)
+      .attr('rx', 4);  // Rounded corners
 
-    legendContainer.append('g')
+    // Enhanced axis
+    const axis = legendContainer.append('g')
       .attr('transform', `translate(0, ${legendHeight})`)
-      .call(legendAxis)
-      .selectAll('text')
+      .call(legendAxis);
+
+    // Style axis text
+    axis.selectAll('text')
       .style('fill', 'white')
-      .style('font-size', '12px');
-  };
+      .style('font-size', '12px')
+      .style('font-weight', '500');
+
+    // Style axis lines
+    axis.selectAll('line')
+      .style('stroke', 'rgba(255, 255, 255, 0.4)');
+    
+    axis.selectAll('path')
+      .style('stroke', 'rgba(255, 255, 255, 0.4)');
+};
 
   const handleMouseOver = (event, d) => {
     d3.select(event.currentTarget)
@@ -426,6 +488,13 @@ export default function Visual() {
           </div>
         )}
       </div>
+      {/* Add the GraphModal here, right before the closing section tag */}
+      <GraphModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        countryData={selectedCountryData}
+        selectedMetric={metric}
+      />
     </section>
   );
 }
