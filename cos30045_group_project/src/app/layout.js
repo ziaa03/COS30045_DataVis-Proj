@@ -29,6 +29,12 @@ const copernicus = localFont({
   weight: "100 900",
 });
 
+const century = localFont({
+  src: "../fonts/CenturyGothic.woff",
+  variable: "--font-century",
+  weight: "100 900",
+});
+
 
 export const metadata = {
   title: "A World in Haze: Mapping Global Air Pollution",
@@ -39,7 +45,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${getOrbitron.variable} ${roboto.variable} ${copernicus.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${getOrbitron.variable} ${roboto.variable} ${copernicus.variable} ${century.variable} antialiased`}
       >
         {children}
       </body>
