@@ -7,7 +7,7 @@ import * as d3 from 'd3';
 // receive props from parent component 
 export default function Graph({ selectedCountry }) {
     // const isFirstRender = useRef(true);
-    const [selectedDataset, setSelectedDataset] = useState('population');
+    const [selectedDataset, setSelectedDataset] = useState('respiratory');
     // const [selectedCountry, setSelectedCountry] = useState('Australia');
     if (!selectedCountry || !selectedDataset) {
       return <div className="text-white text-center">Missing required data</div>;
@@ -498,7 +498,7 @@ export default function Graph({ selectedCountry }) {
 
   return (
     <section 
-      className="relative w-full min-h-dvh text-white/70 flex items-center justify-center scroll-section"
+      className="relative w-full h-[100%] text-white/70 flex items-center justify-center scroll-section"
       id="visual"
     >
       <div className="relative">
