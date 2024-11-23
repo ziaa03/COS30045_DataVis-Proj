@@ -14,7 +14,7 @@ export default function Graph({ selectedCountry }) {
   }
 
     const [dataset, setDataset] = useState(null);
-    // const [width, setWidth] = useState(window.innerWidth);   
+    // const [width, setWidth] = useState(1400);   
     // cant work as there is not browser window available when nextjs first builds the page on the server 
 
     console.log('Current graph:', { selectedCountry, selectedDataset });
@@ -31,9 +31,9 @@ export default function Graph({ selectedCountry }) {
     //   setSelectedCountry(event.target.value);
     // };
 
-    var padding_x = 120; // padding
+    var padding_x = 100; // padding
     var padding_y = 50;
-    var w = 1100; // width
+    // var w = 1100; // width
     var h = 400; // height
 
     // code only runs in the browser, after the component mounts 
