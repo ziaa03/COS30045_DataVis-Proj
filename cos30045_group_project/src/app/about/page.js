@@ -9,7 +9,7 @@ import ProfileCard from '../../components/ProfileCard';
 const About = () => {
   const userData = [
     {
-      profilePicture: '/images/travis_pfp.jpg', // Replace with a dynamic URL
+      profilePicture: '/images/travis_pfp.jpg', 
       name: 'Chak Joo TAN',
       links: [
         { label: 'LinkedIn', url: 'https://www.linkedin.com/in/chak-joo-tan-931638290/', image: '/images/icons/linkedin.png' },
@@ -18,12 +18,12 @@ const About = () => {
       ],
     },
     {
-      profilePicture: '/images/pfp2.jpeg', // Replace with a dynamic URL
+      profilePicture: '/images/zia_pfp.jpg', 
       name: 'Zia Adam Chun Ing TAN',
       links: [
-        { label: 'LinkedIn', url: 'https://www.linkedin.com/in/johndoe', image: '/images/icons/linkedin.png' },
-        { label: 'GitHub', url: 'https://github.com/johndoe', image: '/images/icons/github.png'  },
-        { label: 'Gmail', url: 'https://johndoe.com', image: '/images/icons/gmail.png'  },
+        { label: 'LinkedIn', url: 'https://www.linkedin.com/in/zia-tan-4064562b7', image: '/images/icons/linkedin.png' },
+        { label: 'GitHub', url: 'https://github.com/ziaa03', image: '/images/icons/github.png'  },
+        { label: 'Gmail', url: 'mailto:tziaa04@gmail.com', image: '/images/icons/gmail.png'  },
       ],
     }
   ];

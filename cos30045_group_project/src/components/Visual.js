@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import GraphModal from './GraphModal';
+import Radar from './Radar';
 
 export default function Visual() {
   const svgRef = useRef(null);
@@ -23,6 +24,11 @@ export default function Visual() {
   // states for graph modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCountryData, setSelectedCountryData] = useState(null);
+
+  let max_population = Math.max(...allData.population.values());
+  let max_pm25 = Math.max(...allData.pm25.values());
+  let max_cardiovascular = Math.max(...allData.cardiovascular.values());
+  let max_respiratory = Math.max(...allData.respiratory.values());
 
   useEffect(() => {
     // load TopoJSON data
@@ -345,7 +351,11 @@ export default function Visual() {
         population: allData.population.get(countryName)?.toLocaleString() || 'No data',
         pm25: allData.pm25.get(countryName)?.toFixed(1) + ' µg/m³' || 'No data',
         cardiovascular: allData.cardiovascular.get(countryName)?.toFixed(1) + ' per 100k' || 'No data',
-        respiratory: allData.respiratory.get(countryName)?.toFixed(1) + ' per 100k' || 'No data'
+        respiratory: allData.respiratory.get(countryName)?.toFixed(1) + ' per 100k' || 'No data',
+        population_raw: allData.population.get(countryName) || 0,
+        pm25_raw: allData.pm25.get(countryName)?.toFixed(1) || 0,
+        cardiovascular_raw: allData.cardiovascular.get(countryName)?.toFixed(1) || 0,
+        respiratory_raw: allData.respiratory.get(countryName)?.toFixed(1) || 0
       },
       x: bounds.left + bounds.width,
       y: bounds.top + (bounds.height / 2)
@@ -361,7 +371,7 @@ export default function Visual() {
   useEffect(() => {
     drawVisualization();
   }, [allData, worldData, metric]);
-  
+
   return (
     <section
       className="relative w-full h-[calc(100vh)] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-row items-start scroll-section"
@@ -484,6 +494,16 @@ export default function Visual() {
                 <span className="text-blue-400 font-medium">Respiratory:</span>
                 <span className="text-white">{tooltip.content.respiratory}</span>
               </p>
+              <Radar
+                pm25_radar={tooltip.content.pm25_raw}
+                population_radar={tooltip.content.population_raw}
+                respiratory_radar={tooltip.content.respiratory_raw}
+                cardiovascular_radar={tooltip.content.cardiovascular_raw}
+                max_pm25_radar={max_pm25}
+                max_population_radar={max_population}
+                max_respiratory_radar={max_respiratory}
+                max_cardiovascular_radar={max_cardiovascular}
+              />
             </div>
           </div>
         )}
