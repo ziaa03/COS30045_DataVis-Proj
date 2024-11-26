@@ -5,7 +5,6 @@ import Landing from '../components/Landing';
 import Introduction from '../components/Introduction';
 import Objectives from '../components/Objectives';
 import Visual from '../components/Visual';
-import Graph from '../components/Graph';
 import Footer from '../components/Footer';
 import React from 'react';
 
