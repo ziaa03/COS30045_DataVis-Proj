@@ -238,89 +238,73 @@ export default function Visual() {
   };
 
   const drawLegend = (svg, colorScale, maxValue, width, height) => {
-    // Increased dimensions and adjusted positioning
-    const legendWidth = 400;  // Made wider
-    const legendHeight = 25;   // Made taller
+    // Keep existing legend dimensions
+    const legendWidth = 50;
+    const legendHeight = 850;
     const legendPosition = { 
-      x: 50, 
-      y: height - 120  // Moved up slightly
+        x: width - 150,
+        y: height/2 - legendHeight/2
     };
 
     const legendScale = d3.scaleLinear()
-      .domain([0, maxValue])
-      .range([0, legendWidth]);
+        .domain([maxValue, 0])
+        .range([0, legendHeight]);
 
-    // More ticks for finer granularity
-    const legendAxis = d3.axisBottom(legendScale)
-      .ticks(8)  // Increased number of ticks
-      .tickFormat(d => {
-        // Format numbers with appropriate units
-        if (d >= 1000) {
-          return d3.format('.1f')(d/1000) + 'k';
-        }
-        return d3.format('.1f')(d);
-      });
+    const legendAxis = d3.axisRight(legendScale)
+        .ticks(8)
+        .tickFormat(d => {
+            if (d >= 1000000) {
+                return d3.format('.1f')(d/1000000) + 'M';
+            } else if (d >= 1000) {
+                return d3.format('.1f')(d/1000) + 'k';
+            }
+            return d3.format('.1f')(d);
+        });
 
     const legendContainer = svg.append('g')
-      .attr('transform', `translate(${legendPosition.x}, ${legendPosition.y})`);
+        .attr('transform', `translate(${legendPosition.x}, ${legendPosition.y})`);
 
-    // Enhanced background with gradient
-    legendContainer.append('rect')
-      .attr('x', -15)
-      .attr('y', -30)
-      .attr('width', legendWidth + 30)
-      .attr('height', legendHeight + 60)
-      .attr('fill', 'rgba(0, 0, 0, 0.7)')  // Darker background
-      .attr('rx', 8)  // Rounded corners
-      .attr('filter', 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3))');  // Shadow effect
-
-    // Enhanced title with subtitle
+    // Combine title and unit into single label
     legendContainer.append('text')
-      .attr('x', 0)
-      .attr('y', -10)
-      .attr('fill', 'white')
-      .attr('font-size', '14px')
-      .attr('font-weight', 'bold')  // Made bold
-      .text(`${getMetricLabel()}`);
+        .attr('x', legendWidth/2)
+        .attr('y', -40)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'white')
+        .attr('font-size', '14px')
+        .attr('font-weight', 'bold')
+        .text(`${getMetricLabel()} (${getMetricUnit().trim()})`);
 
-    // Add subtitle with units
-    legendContainer.append('text')
-      .attr('x', legendWidth)
-      .attr('y', -10)
-      .attr('text-anchor', 'end')
-      .attr('fill', 'rgba(255, 255, 255, 0.7)')  // Slightly transparent
-      .attr('font-size', '12px')
-      .text(`(${getMetricUnit().trim()})`);
-
-    // Enhanced gradient
+    // Enhanced gradient (now vertical)
     const defs = svg.append('defs');
     const linearGradient = defs.append('linearGradient')
       .attr('id', 'legend-gradient')
       .attr('gradientUnits', 'userSpaceOnUse')
       .attr('x1', '0%')
-      .attr('x2', '100%');
+      .attr('x2', '0%')
+      .attr('y1', '0%')
+      .attr('y2', '100%');
 
     // More gradient stops for smoother transition
-    const legendStops = Array.from({ length: 20 }, (_, i) => i / 19);
+    const legendStops = Array.from({ length: 50 }, (_, i) => i / 49);
     linearGradient.selectAll('stop')
       .data(legendStops)
       .join('stop')
       .attr('offset', d => `${d * 100}%`)
-      .attr('stop-color', d => colorScale(d * maxValue))
-      .attr('stop-opacity', 0.9);  // Slight transparency
+      .attr('stop-color', d => colorScale(maxValue - (d * maxValue)))  // Reversed for vertical
+      .attr('stop-opacity', 1);
 
-    // Main legend rectangle with border
+    // Main legend rectangle (now vertical)
     legendContainer.append('rect')
       .attr('width', legendWidth)
       .attr('height', legendHeight)
       .style('fill', 'url(#legend-gradient)')
-      .style('stroke', 'rgba(255, 255, 255, 0.2)')  // Subtle border
+      .style('stroke', 'rgba(255, 255, 255, 0.3)')
       .style('stroke-width', 1)
-      .attr('rx', 4);  // Rounded corners
+      .attr('rx', 4);
 
     // Enhanced axis
     const axis = legendContainer.append('g')
-      .attr('transform', `translate(0, ${legendHeight})`)
+      .attr('transform', `translate(${legendWidth}, 0)`)
       .call(legendAxis);
 
     // Style axis text
@@ -331,10 +315,29 @@ export default function Visual() {
 
     // Style axis lines
     axis.selectAll('line')
-      .style('stroke', 'rgba(255, 255, 255, 0.4)');
+      .style('stroke', 'rgba(255, 255, 255, 0.4)')
+      .style('stroke-width', 1);
     
     axis.selectAll('path')
-      .style('stroke', 'rgba(255, 255, 255, 0.4)');
+      .style('stroke', 'rgba(255, 255, 255, 0.4)')
+      .style('stroke-width', 1);
+
+    // Add min/max labels
+    legendContainer.append('text')
+      .attr('x', legendWidth + 5)
+      .attr('y', legendHeight + 30)
+      .attr('text-anchor', 'start')
+      .attr('fill', 'rgba(255, 255, 255, 0.7)')
+      .attr('font-size', '14px')
+      .text('Min');
+
+    legendContainer.append('text')
+      .attr('x', legendWidth + 5)
+      .attr('y', -10)
+      .attr('text-anchor', 'start')
+      .attr('fill', 'rgba(255, 255, 255, 0.7)')
+      .attr('font-size', '14px')
+      .text('Max');
 };
 
   const handleMouseOver = (event, d) => {
@@ -374,106 +377,113 @@ export default function Visual() {
 
   return (
     <section
-      className="relative w-full h-[calc(100vh)] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-row items-start scroll-section"
-      id="visual"
-    >
-      {/* Controls Panel */}
-      <div className="w-72 h-full bg-gray-900/80 backdrop-blur-md p-6 flex flex-col space-y-8 border-r border-gray-700/50 pt-24 shadow-xl">
-        <div className="flex flex-col space-y-6">
-          {/* Title */}
-          <h2 className="text-white text-xl font-semibold tracking-wide">
-            Global PM2.5 Analysis
-          </h2>
-  
-          {/* Metric Selector */}
-          <div className="flex flex-col space-y-3">
-            <label className="text-gray-300 text-sm font-medium">
-              Select Metric
-            </label>
-            <div className="relative">
-              <select
-                value={metric}
-                onChange={(e) => setMetric(e.target.value)}
-                className="w-full bg-gray-800/80 text-white rounded-xl px-4 py-2.5 appearance-none border border-gray-600/50 hover:border-blue-500/50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 shadow-lg"
-              >
-                <option value="pm25">PM2.5 Exposure</option>
-                <option value="respiratory">Respiratory Deaths</option>
-                <option value="cardiovascular">Cardiovascular Deaths</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+    className="relative w-full h-[calc(100vh)] bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex flex-row items-start scroll-section"
+    id="visual"
+>
+    {/* Controls Panel - Enhanced with more modern styling */}
+    <div className="w-80 h-full bg-slate-900/90 backdrop-blur-lg p-8 flex flex-col space-y-8 border-r border-blue-900/30 pt-24 shadow-2xl">
+        <div className="flex flex-col space-y-8">
+            {/* Enhanced Title */}
+            <div className="space-y-2">
+                <h2 className="text-white text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    Global PM2.5 Analysis
+                </h2>
+                <p className="text-slate-400 text-sm">
+                    Interactive visualization of global air quality metrics
+                </p>
             </div>
-          </div>
-  
-          {/* Year Selector */}
-          <div className="flex flex-col space-y-3">
-            <div className="flex justify-between items-center">
-              <label className="text-gray-300 text-sm font-medium">
-                Select Year
-              </label>
-              <span className="text-blue-400 text-sm font-semibold">
-                {selectedYear}
-              </span>
+
+            {/* Enhanced Metric Selector */}
+            <div className="flex flex-col space-y-3">
+                <label className="text-slate-200 text-sm font-semibold">
+                    Select Metric
+                </label>
+                <div className="relative">
+                    <select
+                        value={metric}
+                        onChange={(e) => setMetric(e.target.value)}
+                        className="w-full bg-slate-800/90 text-white rounded-lg px-4 py-3 
+                        appearance-none border border-blue-900/50 hover:border-blue-400/50 
+                        focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 
+                        transition-all duration-300 shadow-lg"
+                    >
+                        <option value="pm25">PM2.5 Exposure</option>
+                        <option value="respiratory">Respiratory Deaths</option>
+                        <option value="cardiovascular">Cardiovascular Deaths</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
             </div>
-            <div className="px-1">
-              <input
-                type="range"
-                min={0}
-                max={availableYears.length - 1}
-                value={availableYears.indexOf(selectedYear)}
-                onChange={(e) => setSelectedYear(availableYears[e.target.value])}
-                className="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer accent-blue-500"
-              />
+
+            {/* Enhanced Year Selector */}
+            <div className="flex flex-col space-y-4">
+                <div className="flex justify-between items-center">
+                    <label className="text-slate-200 text-sm font-semibold">
+                        Select Year
+                    </label>
+                    <span className="text-blue-400 text-sm font-bold px-3 py-1 bg-blue-950/50 rounded-full">
+                        {selectedYear}
+                    </span>
+                </div>
+                <div className="px-1">
+                    <input
+                        type="range"
+                        min={0}
+                        max={availableYears.length - 1}
+                        value={availableYears.indexOf(selectedYear)}
+                        onChange={(e) => setSelectedYear(availableYears[e.target.value])}
+                        className="w-full h-2 bg-slate-700/50 rounded-full appearance-none cursor-pointer 
+                        accent-blue-400 hover:accent-blue-300 transition-colors"
+                    />
+                </div>
+                <div className="flex justify-between text-xs text-slate-400 font-medium">
+                    <span>{availableYears[0]}</span>
+                    <span>{availableYears[availableYears.length - 1]}</span>
+                </div>
             </div>
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>{availableYears[0]}</span>
-              <span>{availableYears[availableYears.length - 1]}</span>
+
+            {/* Enhanced Legend Info */}
+            <div className="flex flex-col space-y-4 p-5 bg-gradient-to-br from-slate-800/50 
+                to-slate-700/30 rounded-xl border border-blue-900/30 backdrop-blur-lg shadow-xl">
+                <h3 className="text-slate-200 text-sm font-semibold">Current Metric</h3>
+                <div className="flex items-center space-x-3">
+                    <div className="w-5 h-5 rounded-full shadow-lg"
+                        style={{
+                            backgroundColor: metric === 'pm25' ? '#cc0000' :
+                                metric === 'respiratory' ? '#7cc5d2' : '#45c386',
+                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)'
+                        }}
+                    />
+                    <span className="text-white text-sm font-medium">
+                        {getMetricLabel()}
+                    </span>
+                </div>
+                <span className="text-slate-400 text-xs font-medium px-2 py-1 bg-slate-800/50 rounded-md w-fit">
+                    Unit: {getMetricUnit()}
+                </span>
             </div>
-          </div>
-  
-          {/* Legend Info */}
-          <div className="flex flex-col space-y-2 mt-6 p-4 bg-gradient-to-br from-gray-800/50 to-gray-700/30 rounded-xl border border-gray-700/50 backdrop-blur-sm shadow-lg">
-            <h3 className="text-gray-300 text-sm font-medium">Current Metric</h3>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 rounded-full shadow-inner"
-                style={{
-                  backgroundColor: metric === 'pm25' ? '#ef4444' :
-                    metric === 'respiratory' ? '#3b82f6' : '#22c55e',
-                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
-                }}
-              />
-              <span className="text-white text-sm">
-                {getMetricLabel()}
-              </span>
-            </div>
-            <span className="text-gray-400 text-xs">
-              Unit: {getMetricUnit()}
-            </span>
-          </div>
         </div>
-  
-        {/* Credits */}
-        <div className="mt-auto text-xs text-gray-400/80 bg-gray-800/30 p-3 rounded-lg border border-gray-700/30">
-          <p>Data source: OECD Statistics</p>
-        </div>
-      </div>
-  
-      {/* Map Container */}
-      <div className="relative flex-1 h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    </div>
+
+    {/* Map Container - Enhanced with better gradient */}
+    <div className="relative flex-1 h-full bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
         <svg ref={svgRef} className="w-full h-full" />
+        {/* Enhanced Tooltip */}
         {tooltip.show && (
-          <div
-            className="fixed z-50 bg-gray-900/95 backdrop-blur-md text-white px-6 py-4 rounded-xl shadow-2xl border border-gray-700/50"
-            style={{
-              left: `${tooltip.x}px`,
-              top: `${tooltip.y}px`,
-              transform: 'translate(10px, -50%)',
-              pointerEvents: 'none',
-            }}
-          >
+            <div
+                className="fixed z-50 bg-slate-900/95 backdrop-blur-md text-white px-8 py-6 
+                rounded-xl shadow-2xl border border-blue-900/50 transition-all duration-300"
+                style={{
+                    left: `${tooltip.x}px`,
+                    top: `${tooltip.y}px`,
+                    transform: 'translate(10px, -50%)',
+                    pointerEvents: 'none',
+                }}
+            >
             <h3 className="text-lg font-semibold mb-3 text-blue-400">
               {tooltip.content.name}
             </h3>
@@ -514,7 +524,7 @@ export default function Visual() {
         onClose={() => setIsModalOpen(false)}
         countryData={selectedCountryData}
         selectedMetric={metric}
-      />
-    </section>
+    />
+</section>
   );
 }
