@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { ChevronDown } from 'lucide-react';
+import RadialPopulationChart from './RadialPopulation';
 
 // parent component - graphmodal.js 
 // receive props from parent component 
@@ -14,27 +16,50 @@ export default function Graph({ selectedCountry }) {
   }
 
     const [dataset, setDataset] = useState(null);
-    // const [width, setWidth] = useState(1400);   
-    // cant work as there is not browser window available when nextjs first builds the page on the server 
+    const [width, setWidth] = useState(1200);    
 
-    console.log('Current graph:', { selectedCountry, selectedDataset });
-    
-    // replace with: 
-    // setting initial width state
-    const [width, setWidth] = useState(1100);    
+    // dropdown menu 
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    // Dropdown options
+    const options = [
+      {
+          value: 'respiratory',
+          label: 'Respiratory Death Rate',
+          description: 'Deaths per 100,000 population'
+      },
+      {
+          value: 'cardiovascular',
+          label: 'Cardiovascular Death Rate',
+          description: 'Deaths per 100,000 population'
+      },
+      {
+          value: 'population',
+          label: 'Population',
+          description: 'Total population count'
+      }
+  ];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setIsDropdownOpen(false);
+        }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+}, []);
 
     const handleChange = (event) => {
       setSelectedDataset(event.target.value);
     };
 
-    // const handleCountryChange = (event) => {
-    //   setSelectedCountry(event.target.value);
-    // };
-
     var padding_x = 100; // padding
     var padding_y = 50;
-    // var w = 1100; // width
-    var h = 400; // height
+    var h = 500; // height
 
     // code only runs in the browser, after the component mounts 
     useEffect(() => {
@@ -188,77 +213,76 @@ export default function Graph({ selectedCountry }) {
 
     // create a point line for each data
     var line = d3.line()
-                .x(function(d) { return xScale(d.year); })
-                .y(function(d) { return yScale(d.value); });
-
-    var area = d3.area()
             .x(function(d) { return xScale(d.year); })
-            .y0(function() { return yScale.range()[0]; })
-            .y1(function(d) { return yScale(d.value); })
+            .y(function(d) { return yScale(d.value); });
 
-    var line_sub = d3.line()
-                .x(function(d) { return xScale(d.sub_year); })
-                .y(function(d) { return yScale_right(d.sub_value); });
+var area = d3.area()
+        .x(function(d) { return xScale(d.year); })
+        .y0(function() { return yScale.range()[0]; })
+        .y1(function(d) { return yScale(d.value); })
 
-    d3.select('#sub-legend-line')
-                    .append('rect')
-                    .attr("width", "100%")
-                    .attr("height", "100%")
-                    .attr("fill", color);
+var line_sub = d3.line()
+            .x(function(d) { return xScale(d.sub_year); })
+            .y(function(d) { return yScale_right(d.sub_value); });
 
-    d3.select('#sub-legend-title')
-            .selectAll('*').remove();
+// Update the legend styles
+d3.select('#sub-legend-line')
+                .append('rect')
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("fill", color);
 
-    d3.select('#sub-legend-title')
-                    .append('text')
-                    .text(title);
+d3.select('#sub-legend-title')
+        .selectAll('*').remove();
 
-    // create a svg element in the body tag
-    var svg = d3.select("#graph")
-        .append("svg")
-        .attr("width", w)
-        .attr("height", h);
+d3.select('#sub-legend-title')
+                .append('text')
+                .text(title);
 
-    var path = svg.append("path")
-        .datum(values)
-        .attr("class", "line")
-        .attr("d", area)
-        .attr("fill", "rgba(0, 255, 255, 0.2)")
-        .attr("stroke", "#00FFFF") 
-        .attr("stroke-width", 0.5);
+// create a svg element in the body tag
+var svg = d3.select("#graph")
+    .append("svg")
+    .attr("width", w)
+    .attr("height", h);
 
-    var path_sub = svg.append("path")
-        .datum(values_sub)
-        .attr("class", "line")
-        .attr("d", line_sub)
-        .attr("fill", "none") 
-        .attr("stroke", color)
-        .attr("stroke-width", 1.5);
+// Add paths with safer animation handling
+var path = svg.append("path")
+    .datum(values)
+    .attr("class", "line")
+    .attr("d", area)
+    .attr("fill", "rgba(0, 255, 255, 0.2)")
+    .attr("stroke", "#00FFFF") 
+    .attr("stroke-width", 0.5)
+    .style("opacity", 0);  // Start with opacity 0
 
-    // Get the total length of the path
-    var totalLength = path.node().getTotalLength();
-    var totalLength2 = path_sub.node().getTotalLength();
+var path_sub = svg.append("path")
+    .datum(values_sub)
+    .attr("class", "line")
+    .attr("d", line_sub)
+    .attr("fill", "none") 
+    .attr("stroke", color)
+    .attr("stroke-width", 1.5)
+    .style("opacity", 0);  // Start with opacity 0
 
-    // set the stroke-dasharray and stroke-dashoffset to the total length
-    path
-        .attr("stroke-dasharray", totalLength) 
-        .attr("stroke-dashoffset", totalLength)
-
-    // Animate the line by transitioning stroke-dashoffset to 0
-    path.transition()
-        .duration(1000)
-        .ease(d3.easeLinear) 
-        .attr("stroke-dashoffset", 0);
+// Safer animation approach
+function animatePath(pathElement) {
+    if (!pathElement.node()) return;  // Safety check
     
-    // Animate for another line
-    path_sub
-      .attr("stroke-dasharray", totalLength2) 
-      .attr("stroke-dashoffset", totalLength2)
-
-    path_sub.transition()
-        .duration(1000) 
-        .ease(d3.easeLinear)  
+    const totalLength = pathElement.node().getTotalLength();
+    
+    pathElement
+        .attr("stroke-dasharray", totalLength)
+        .attr("stroke-dashoffset", totalLength)
+        .style("opacity", 1)  // Make visible
+        .transition()
+        .duration(1000)
+        .ease(d3.easeLinear)
         .attr("stroke-dashoffset", 0);
+}
+
+// Only animate if paths exist
+if (path.node()) animatePath(path);
+if (path_sub.node()) animatePath(path_sub);
 
     // display the x axis in svg element
     svg.append("g")
@@ -496,56 +520,102 @@ export default function Graph({ selectedCountry }) {
     });
   }, [dataset, selectedCountry, width]);
 
+  // In your main Graph component, add this condition in the return statement
   return (
     <section 
-      className="relative w-full h-[100%] text-white/70 flex items-center justify-center scroll-section"
-      id="visual"
+        className="relative w-full h-[100%] text-white/70 flex items-center justify-center scroll-section"
+        id="visual"
     >
-      <div className="relative">
-        <h2 className="text-white/70 w-[100%] text-center text-xl">Country: {selectedCountry}</h2>
-        <div className="w-full flex items-center absolute translate-y-4">
-          <span className="w-[20%] text-white/70 text-xs bg-transparent ml-0 mr-auto"  style={{ textDecorationColor: '#00FFFF' }}>
-            PM2.5 Exposure Level (µg/m³)
-          </span>
-          <select
-            className="w-fit text-white/70 text-xs bg-transparent hover:border rounded transition duration-150"
-            value={selectedDataset}
-            onChange={handleChange}
-          >
-            <option className="text-black" value="Respiratory Death Rate">
-              Respiratory Death Rate (per 100k)
-            </option>
-            <option className="text-black" value="Cardiovascular Death Rate">
-              Cardiovascular Death Rate (per 100k)
-            </option>
-            <option className="text-black" value="Population">
-              Population
-            </option>
-          </select>
+        <div className="relative">
+            <div className="w-full flex items-center justify-between mb-6 px-4">
+                {/* Left side - Title and PM2.5 label */}
+                <div className="flex flex-col">
+                    <h2 className="text-xl font-medium text-white mb-2">{selectedCountry}</h2>
+                    <span className="text-sm text-white/70">
+                        PM2.5 Exposure Level (µg/m³)
+                    </span>
+                </div>
+
+                {/* Custom Dropdown */}
+                <div className="relative" ref={dropdownRef}>
+                    <button
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 
+                                 rounded-lg transition-all duration-200 min-w-[240px]
+                                 border border-white/10 hover:border-white/20"
+                    >
+                        <div className="flex-1 text-left">
+                            <p className="text-white text-sm">
+                                {options.find(opt => opt.value === selectedDataset)?.label || 'Select metric'}
+                            </p>
+                            <p className="text-white/50 text-xs">
+                                {options.find(opt => opt.value === selectedDataset)?.description}
+                            </p>
+                        </div>
+                        <ChevronDown 
+                            className={`w-4 h-4 transition-transform duration-200 
+                                      ${isDropdownOpen ? 'rotate-180' : ''}`}
+                        />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {isDropdownOpen && (
+                        <div className="absolute right-0 mt-2 w-[240px] py-1 bg-black/90 backdrop-blur-lg 
+                                      rounded-lg shadow-lg border border-white/10 z-50">
+                            {options.map((option) => (
+                                <button
+                                    key={option.value}
+                                    onClick={() => {
+                                        setSelectedDataset(option.value);
+                                        setIsDropdownOpen(false);
+                                    }}
+                                    className={`w-full px-4 py-2.5 text-left transition-colors
+                                              hover:bg-white/10 group
+                                              ${selectedDataset === option.value ? 'bg-white/5' : ''}`}
+                                >
+                                    <p className={`text-sm ${selectedDataset === option.value 
+                                        ? 'text-white' 
+                                        : 'text-white/70 group-hover:text-white'}`}>
+                                        {option.label}
+                                    </p>
+                                    <p className="text-white/50 text-xs">
+                                        {option.description}
+                                    </p>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {selectedDataset === 'population' ? (
+                <RadialPopulationChart 
+                    selectedCountry={selectedCountry}
+                    dataset={dataset}
+                    width={width}
+                />
+            ) : (
+                <>
+                    <div id="graph"></div>
+                    <div className='w-full text-center absolute -translate-y-4'>
+                        <span>Year</span>
+                    </div>
+                    
+                    {/* Legend - Only show for non-population datasets */}
+                    <div className="w-full flex items-center justify-center space-x-6 mt-12">
+                        <div className="flex items-center space-x-3 px-4 py-2 bg-white/5 rounded-lg">
+                            <div className="w-8 h-0.5 bg-[#00FFFF]"></div>
+                            <span className="text-sm text-white">PM2.5 Exposure Level</span>
+                        </div>
+
+                        <div className="flex items-center space-x-3 px-4 py-2 bg-white/5 rounded-lg">
+                            <div className="w-8 h-0.5" style={{ backgroundColor: dataset?.color }}></div>
+                            <span className="text-sm text-white">{dataset?.title}</span>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
-        
-        <div id="graph"></div>
-
-        <div className='w-full text-center absolute -translate-y-4'><span>Year</span></div>
-
-        <div className="w-full flex items-center justify-center space-x-6 mt-12">
-        
-          <div className='w-fit flex items-center space-x-2'>
-            <svg width="30" height="2" className="">
-              <rect width="100%" height="100%" fill="#00FFFF" />
-            </svg>
-            <span className="text-sm">PM2.5 Exposure Level</span>
-          </div>
-
-          <div className='w-fit flex items-center space-x-2'>
-            <svg id='sub-legend-line' width="30" height="2" className="">
-              <rect  width="100%" height="100%" fill="#00FFFF" />
-            </svg>
-            <span id='sub-legend-title' className="text-sm"></span>
-          </div>
-          
-        </div>
-      </div>
     </section>
-  );
+);
 }
