@@ -13,7 +13,7 @@ export default function Objectives() {
       id: 1,
       icon: Activity,
       title: "Track Air Quality",
-      description: "Monitor real-time PM2.5 levels and track historical trends across different regions",
+      description: "Monitor PM2.5 levels and track historical trends across different regions",
       color: "text-blue-400",
       bgColor: "bg-blue-400/10",
       borderColor: "border-blue-400/20"
@@ -38,15 +38,6 @@ export default function Objectives() {
     },
     {
       id: 4,
-      icon: Factory,
-      title: "Source Tracking",
-      description: "Identify and monitor major pollution sources and their impact on air quality",
-      color: "text-orange-400",
-      bgColor: "bg-orange-400/10",
-      borderColor: "border-orange-400/20"
-    },
-    {
-      id: 5,
       icon: Users,
       title: "Health Impact",
       description: "Assess the relationship between PM2.5 levels and public health metrics",
@@ -116,7 +107,7 @@ export default function Objectives() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: "url('/images/objective-bg.jpg')",
-            filter: "brightness(0.2)"
+            filter: "brightness(0.4)"
           }}
         />
         

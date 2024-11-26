@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, Wind, Factory, Leaf } from 'lucide-react';
+import { AlertCircle, Wind, Factory} from 'lucide-react';
 
 const ParticleEffect = () => {
   const [particles, setParticles] = useState([]);
@@ -64,8 +64,8 @@ export default function Introduction() {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('/images/intro.jpg')",
-            filter: "brightness(0.3)"
+            backgroundImage: "url('/images/intro-pg.jpg')",
+            filter: "brightness(0.6)"
           }}
         />
       </div>

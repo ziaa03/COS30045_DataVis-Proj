@@ -28,14 +28,14 @@ export default function Landing() {
           muted 
           loop
           playsInline
-          style={{ filter: 'brightness(0.5) saturate(1.2)' }}
+          style={{ filter: 'brightness(0.8) saturate(1.2)' }}
         >
           <source src='/videos/world.mp4' type='video/mp4' />
         </video>
       </div>
 
       {/* Enhanced Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/50 to-black/70 z-[1]" />
+
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent z-[1]" />
 
       {/* Main Content */}
