@@ -9,7 +9,7 @@ import RadialPopulationChart from './RadialPopulation';
 // receive props from parent component 
 export default function Graph({ selectedCountry }) {
     // const isFirstRender = useRef(true);
-    const [selectedDataset, setSelectedDataset] = useState('respiratory');
+    const [selectedDataset, setSelectedDataset] = useState('pm_death_rate');
     // const [selectedCountry, setSelectedCountry] = useState('Australia');
     if (!selectedCountry || !selectedDataset) {
       return <div className="text-white text-center">Missing required data</div>;
@@ -24,15 +24,20 @@ export default function Graph({ selectedCountry }) {
 
     // Dropdown options
     const options = [
+      // {
+      //     value: 'respiratory',
+      //     label: 'Respiratory Death Rate',
+      //     description: 'Deaths per 100,000 population'
+      // },
+      // {
+      //     value: 'cardiovascular',
+      //     label: 'Cardiovascular Death Rate',
+      //     description: 'Deaths per 100,000 population'
+      // },
       {
-          value: 'respiratory',
-          label: 'Respiratory Death Rate',
-          description: 'Deaths per 100,000 population'
-      },
-      {
-          value: 'cardiovascular',
-          label: 'Cardiovascular Death Rate',
-          description: 'Deaths per 100,000 population'
+        value: 'pm_death_rate',
+        label: 'Outdoor Particulate Matter Pollution Death Rate',
+        description: '% of total country population'
       },
       {
           value: 'population',
@@ -93,45 +98,58 @@ export default function Graph({ selectedCountry }) {
             title: datasetType, 
             measurement: ''
           };
-        case 'Respiratory Death Rate':
-        case 'respiratory':  // Add case for metric from map
+        case 'Particulate Matter Death Rate':
+        case 'pm_death_rate':  // Add case for metric from map
           return { 
-            data: d3.csv('/datasets/respiratory_death_rate.csv'), 
+            data: d3.csv('/datasets/death_by_pm.csv'), 
             color: '#FFA500', 
-            title: datasetType, 
-            measurement: 'per 100k'
+            title: 'Particulate Matter Death Rate', 
+            measurement: '%'
           };
-        case 'Cardiovascular Death Rate':
-        case 'cardiovascular':  // Add case for metric from map
-          return { 
-            data: d3.csv('/datasets/cardiovascular_death_rate.csv'), 
-            color: '#FFA500', 
-            title: datasetType, 
-            measurement: 'per 100k'
-          };
+        // case 'Respiratory Death Rate':
+        // case 'respiratory':  // Add case for metric from map
+        //   return { 
+        //     data: d3.csv('/datasets/respiratory_death_rate.csv'), 
+        //     color: '#FFA500', 
+        //     title: datasetType, 
+        //     measurement: '%'
+        //   };
+        // case 'Cardiovascular Death Rate':
+        // case 'cardiovascular':  // Add case for metric from map
+        //   return { 
+        //     data: d3.csv('/datasets/cardiovascular_death_rate.csv'), 
+        //     color: '#FFA500', 
+        //     title: datasetType, 
+        //     measurement: '%'
+        //   };
         default:
           return { 
-            data: d3.csv('/datasets/respiratory_death_rate.csv'), 
+            data: d3.csv('/datasets/death_by_pm.csv'), 
             color: '#FFA500', 
             title: datasetType, 
-            measurement: 'per 100k'
+            measurement: '%'
           };
       }
     };
 
     // Load the CSV file and process the data
     d3.csv('/datasets/oecd_pm25_exposure.csv').then(function(data_oecd) {
+        d3.csv('/datasets/population.csv').then(function(data_pop) {
       const { data, color, title, measurement } = loadData(selectedDataset);
 
       data.then((data_sub) => {
 
-        // console.log(data_sub); // process the dataset
+        console.log(data_sub); // process the dataset
         // console.log(color); // use the color
 
-        setDataset({ oecd: data_oecd, sub: data_sub, color: color, title: title, measurement: measurement});
+        setDataset({ oecd: data_oecd, sub: data_sub, pop: data_pop, color: color, title: title, measurement: measurement});
 
     }).catch((error) => {
       console.error('Error loading data:', error);
+    });
+
+    }).catch(error => {
+        console.error("Error loading CSV data:", error);
     });
 
     }).catch(error => {
@@ -147,11 +165,28 @@ export default function Graph({ selectedCountry }) {
     d3.select('#graph').selectAll('*').remove();
 
     // Extracting and processing data for rendering
-    const { oecd, sub, color, title } = dataset;
+    const { oecd, sub, pop, color, title } = dataset;
 
     // Find the row for "Japan"
     const country_oecd = oecd.find(d => d['Country'] === selectedCountry);
-    const country_sub = sub.find(d => d['Country'] === selectedCountry);
+    const country_rate = sub.find(d => d['Country'] === selectedCountry);
+    const country_pop = pop.find(d => d['Country'] === selectedCountry);
+
+    // Initialize an empty object to store the combined data
+    const country_sub = {
+        Country: selectedCountry
+    };
+  
+  // Iterate over each year in country_pop (excluding the "Country" key)
+  Object.keys(country_pop).forEach(year => {
+    // Skip the "Country" key since it's not a year
+    if (year !== "Country") {
+      // Add the values for each year (population + sub values)
+      country_sub[year] = country_rate[year] / country_pop[year] * 100 ;
+    }
+  });
+  
+  console.log(country_sub);
 
     if (!country_oecd && !country_sub) {
       console.error(`No data found for ${selectedCountry}`);

@@ -100,7 +100,7 @@ const About = () => {
                     target='_blank'
                     className='text-slate-400 hover:text-slate-100 duration-300'
                   >
-                    PM2.5 Exposure Levels - Countires and Regions
+                    PM2.5 Exposure Levels - Countries and Regions
                   </Link>
                 </p>
                 <br/>
