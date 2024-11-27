@@ -13,8 +13,7 @@ export default function Visual() {
   const [allData, setAllData] = useState({
     population: new Map(),
     pm25: new Map(),
-    cardiovascular: new Map(),
-    respiratory: new Map()
+    death_by_pm: new Map()
   });
   const [yearData, setYearData] = useState({});
   const [selectedYear, setSelectedYear] = useState('');
@@ -27,8 +26,7 @@ export default function Visual() {
 
   let max_population = Math.max(...allData.population.values());
   let max_pm25 = Math.max(...allData.pm25.values());
-  let max_cardiovascular = Math.max(...allData.cardiovascular.values());
-  let max_respiratory = Math.max(...allData.respiratory.values());
+  let max_death_by_pm = Math.max(...allData.death_by_pm.values());
 
   useEffect(() => {
     // load TopoJSON data
@@ -36,19 +34,17 @@ export default function Visual() {
       .then(response => response.json())
       .then(data => setWorldData(data));
 
-    // load all csv data then processsed to create a structured data map
+    // load all csv data then processed to create a structured data map
     Promise.all([
       d3.csv('/datasets/population.csv'),
       d3.csv('/datasets/oecd_pm25_exposure.csv'),
-      d3.csv('/datasets/cardiovascular_death_rate.csv'),
-      d3.csv('/datasets/respiratory_death_rate.csv')
-    ]).then(([populationData, pm25Data, cardioData, respData]) => {
-      // convert raw csv data into structured maps keyed by year and country 
-      // and extract the list of available years for the data
+      d3.csv('/datasets/death_by_pm.csv')
+    ]).then(([populationData, pm25Data, deathByPMData]) => {
+      // Process population data first
       const processDataWithYears = (data, keyName) => {
         const yearMap = new Map();
         const years = new Set();
-        
+
         data.forEach(d => {
           const yearColumns = Object.keys(d).filter(key => key !== keyName && !isNaN(key));
           yearColumns.forEach(year => years.add(year));
@@ -67,16 +63,47 @@ export default function Visual() {
         return { yearMap, years: Array.from(years).sort() };
       };
 
+      // Process death data with normalization
+      const processDeathData = (deathData, populationYearMap) => {
+        const yearMap = new Map();
+        const years = new Set();
+      
+        deathData.forEach(d => {
+          const yearColumns = Object.keys(d).filter(key => key !== 'Country' && !isNaN(key));
+          yearColumns.forEach(year => years.add(year));
+      
+          const countryName = d['Country'].trim();
+          yearColumns.forEach(year => {
+            if (!yearMap.has(year)) {
+              yearMap.set(year, new Map());
+            }
+            
+            const population = populationYearMap.get(year)?.get(countryName);
+            const deaths = +d[year];
+            
+            if (population && deaths) {
+              // Calculate what percentage of population died from PM2.5
+              const normalizedValue = (deaths / population) * 100;  // Convert to percentage
+              yearMap.get(year).set(countryName, normalizedValue);
+            }
+          });
+        });
+      
+        return { yearMap, years: Array.from(years).sort() };
+      };
+
       const populationYearData = processDataWithYears(populationData, 'Country');
       const pm25YearData = processDataWithYears(pm25Data, 'Country');
-      const cardioYearData = processDataWithYears(cardioData, 'Country');
-      const respYearData = processDataWithYears(respData, 'Country');
+      const deathByPmYearData = processDeathData(
+        deathByPMData, 
+        populationYearData.yearMap,
+        pm25YearData.yearMap
+      );
 
       // finds the intersection of available years across all datasets 
       const commonYears = pm25YearData.years.filter(year => 
         populationYearData.years.includes(year) &&
-        cardioYearData.years.includes(year) &&
-        respYearData.years.includes(year)
+        deathByPmYearData.years.includes(year)
       );
 
       setAvailableYears(commonYears);
@@ -85,8 +112,7 @@ export default function Visual() {
       setYearData({
         population: populationYearData.yearMap,
         pm25: pm25YearData.yearMap,
-        cardiovascular: cardioYearData.yearMap,
-        respiratory: respYearData.yearMap
+        death_by_pm: deathByPmYearData.yearMap
       });
     });
   }, []);
@@ -98,8 +124,7 @@ export default function Visual() {
     const currentData = {
       population: yearData.population.get(selectedYear),
       pm25: yearData.pm25.get(selectedYear),
-      cardiovascular: yearData.cardiovascular.get(selectedYear),
-      respiratory: yearData.respiratory.get(selectedYear)
+      death_by_pm: yearData.death_by_pm.get(selectedYear)
     };
 
     setAllData(currentData);
@@ -177,8 +202,7 @@ export default function Visual() {
         name: countryName,
         population: allData.population.get(countryName),
         pm25: allData.pm25.get(countryName),
-        cardiovascular: allData.cardiovascular.get(countryName),
-        respiratory: allData.respiratory.get(countryName)
+        death_by_pm: allData.death_by_pm.get(countryName),
       });
       setIsModalOpen(true);
     } else {
@@ -203,10 +227,8 @@ export default function Visual() {
     switch (metric) {
       case 'pm25':
         return d3.interpolateReds;
-      case 'respiratory':
+      case 'death_by_pm':
         return d3.interpolateBlues;
-      case 'cardiovascular':
-        return d3.interpolateGreens;
       default:
         return d3.interpolateReds;
     }
@@ -216,27 +238,24 @@ export default function Visual() {
     switch (metric) {
       case 'pm25':
         return 'PM2.5 Exposure';
-      case 'respiratory':
-        return 'Respiratory Deaths';
-      case 'cardiovascular':
-        return 'Cardiovascular Deaths';
+      case 'death_by_pm':
+        return 'PM2.5 Mortality Rate';  // More precise label
       default:
         return '';
     }
   };
-
+  
   const getMetricUnit = () => {
     switch (metric) {
       case 'pm25':
         return ' µg/m³';
-      case 'respiratory':
-      case 'cardiovascular':
-        return ' per 100k';
+      case 'death_by_pm':
+        return ' % of population';  // Clearer unit for mortality rate
       default:
         return '';
     }
   };
-
+  
   const drawLegend = (svg, colorScale, maxValue, width, height) => {
     // Keep existing legend dimensions
     const legendWidth = 50;
@@ -353,12 +372,11 @@ export default function Visual() {
         name: countryName,
         population: allData.population.get(countryName)?.toLocaleString() || 'No data',
         pm25: allData.pm25.get(countryName)?.toFixed(1) + ' µg/m³' || 'No data',
-        cardiovascular: allData.cardiovascular.get(countryName)?.toFixed(1) + ' per 100k' || 'No data',
-        respiratory: allData.respiratory.get(countryName)?.toFixed(1) + ' per 100k' || 'No data',
+        death_by_pm: (allData.death_by_pm.get(countryName)?.toFixed(4) || 'No data') + '% of population',
+        
         population_raw: allData.population.get(countryName) || 0,
         pm25_raw: allData.pm25.get(countryName)?.toFixed(1) || 0,
-        cardiovascular_raw: allData.cardiovascular.get(countryName)?.toFixed(1) || 0,
-        respiratory_raw: allData.respiratory.get(countryName)?.toFixed(1) || 0
+        death_by_pm_raw: allData.death_by_pm.get(countryName) || 0
       },
       x: bounds.left + bounds.width,
       y: bounds.top + (bounds.height / 2)
@@ -376,10 +394,8 @@ export default function Visual() {
   }, [allData, worldData, metric]);
 
   return (
-    <section
-    className="relative w-full h-[calc(100vh)] bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex flex-row items-start scroll-section"
-    id="visual"
->
+    <section className="relative w-full h-[calc(100vh)] bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex flex-row items-start scroll-section" id="visual">
+
     {/* Controls Panel - Enhanced with more modern styling */}
     <div className="w-80 h-full bg-slate-900/90 backdrop-blur-lg p-8 flex flex-col space-y-8 border-r border-blue-900/30 pt-24 shadow-2xl">
         <div className="flex flex-col space-y-8">
@@ -408,8 +424,7 @@ export default function Visual() {
                         transition-all duration-300 shadow-lg"
                     >
                         <option value="pm25">PM2.5 Exposure</option>
-                        <option value="respiratory">Respiratory Deaths</option>
-                        <option value="cardiovascular">Cardiovascular Deaths</option>
+                        <option value="death_by_pm">Deaths by PM2.5</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                         <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -472,51 +487,42 @@ export default function Visual() {
     {/* Map Container - Enhanced with better gradient */}
     <div className="relative flex-1 h-full bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
         <svg ref={svgRef} className="w-full h-full" />
-        {/* Enhanced Tooltip */}
-        {tooltip.show && (
-            <div
-                className="fixed z-50 bg-slate-900/95 backdrop-blur-md text-white px-8 py-6 
-                rounded-xl shadow-2xl border border-blue-900/50 transition-all duration-300"
-                style={{
-                    left: `${tooltip.x}px`,
-                    top: `${tooltip.y}px`,
-                    transform: 'translate(10px, -50%)',
-                    pointerEvents: 'none',
-                }}
-            >
-            <h3 className="text-lg font-semibold mb-3 text-blue-400">
-              {tooltip.content.name}
-            </h3>
-            <div className="space-y-2">
-              <p className="text-sm flex items-center space-x-3">
-                <span className="text-gray-400 font-medium">Population:</span>
-                <span className="text-white">{tooltip.content.population}</span>
-              </p>
-              <p className="text-sm flex items-center space-x-3">
-                <span className="text-red-400 font-medium">PM2.5:</span>
-                <span className="text-white">{tooltip.content.pm25}</span>
-              </p>
-              <p className="text-sm flex items-center space-x-3">
-                <span className="text-green-400 font-medium">Cardiovascular:</span>
-                <span className="text-white">{tooltip.content.cardiovascular}</span>
-              </p>
-              <p className="text-sm flex items-center space-x-3">
-                <span className="text-blue-400 font-medium">Respiratory:</span>
-                <span className="text-white">{tooltip.content.respiratory}</span>
-              </p>
-              <Radar
-                pm25_radar={tooltip.content.pm25_raw}
-                population_radar={tooltip.content.population_raw}
-                respiratory_radar={tooltip.content.respiratory_raw}
-                cardiovascular_radar={tooltip.content.cardiovascular_raw}
-                max_pm25_radar={max_pm25}
-                max_population_radar={max_population}
-                max_respiratory_radar={max_respiratory}
-                max_cardiovascular_radar={max_cardiovascular}
-              />
-            </div>
+        {/* Update tooltip content */}
+      {tooltip.show && (
+        <div className="fixed z-50 bg-slate-900/95 backdrop-blur-md text-white px-8 py-6 rounded-xl shadow-2xl border border-blue-900/50 transition-all duration-300"
+          style={{
+            left: `${tooltip.x}px`,
+            top: `${tooltip.y}px`,
+            transform: 'translate(10px, -50%)',
+            pointerEvents: 'none',
+          }}>
+          <h3 className="text-lg font-semibold mb-3 text-blue-400">
+            {tooltip.content.name}
+          </h3>
+          <div className="space-y-2">
+            <p className="text-sm flex items-center space-x-3">
+              <span className="text-gray-400 font-medium">Population:</span>
+              <span className="text-white">{tooltip.content.population}</span>
+            </p>
+            <p className="text-sm flex items-center space-x-3">
+              <span className="text-red-400 font-medium">PM2.5:</span>
+              <span className="text-white">{tooltip.content.pm25}</span>
+            </p>
+            <p className="text-sm flex items-center space-x-3">
+              <span className="text-blue-400 font-medium">Deaths by PM2.5:</span>
+              <span className="text-white">{tooltip.content.death_by_pm}</span>
+            </p>
+            <Radar
+              pm25_radar={tooltip.content.pm25_raw}
+              population_radar={tooltip.content.population_raw}
+              death_by_pm_radar={tooltip.content.death_by_pm_raw}
+              max_pm25_radar={max_pm25}
+              max_population_radar={max_population}
+              max_death_by_pm_radar={max_death_by_pm}
+            />
           </div>
-        )}
+        </div>
+      )}
       </div>
       {/* Add the GraphModal here, right before the closing section tag */}
       <GraphModal
