@@ -140,21 +140,21 @@ const About = () => {
                 <p className="mt-2 text-sm leading-6">
                   
                   <Link 
-                    href='https://ourworldindata.org/grapher/cardiovascular-disease-death-rates?tab=table'
+                    href='https://ourworldindata.org/air-pollution'
                     target='_blank'
                     className='text-slate-400 hover:text-slate-100 duration-300'
                   >
-                    Death rate from cardiovascular diseases
+                    Deaths by Risk Factor, World
                   </Link>
                 </p>
                 <p className="mt-2 text-sm leading-6">
                   
                   <Link 
-                    href='https://ourworldindata.org/grapher/respiratory-disease-death-rate?tab=table'
+                    href='https://ourworldindata.org/grapher/median-age?tab=table&time=1990..2020'
                     target='_blank'
                     className='text-slate-400 hover:text-slate-100 duration-300'
                   >
-                    Chronic respiratory diseases death rate
+                    Median age
                   </Link>
                 </p>
                 <br/>
