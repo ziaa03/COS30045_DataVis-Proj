@@ -558,7 +558,7 @@ const handleMouseOver = (event, d) => {
 
         {/* Tooltip (keep existing code) */}
         {tooltip.show && (
-        <div className="fixed z-50 bg-slate-900/95 backdrop-blur-md text-white px-8 py-6 rounded-xl shadow-2xl border border-blue-900/50 transition-all duration-300"
+        <div className="fixed z-50 bg-slate-900/95 text-white px-8 py-6 rounded-xl shadow-2xl border border-blue-900/50 transition-all duration-300"
           style={{
             left: `${tooltip.x}px`,
             top: `${tooltip.y}px`,
