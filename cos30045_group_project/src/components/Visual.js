@@ -229,21 +229,32 @@ export default function Visual() {
     switch (metric) {
       case 'pm25':
         return d3.interpolateReds;
-      case 'death_by_pm':
-        return d3.interpolateBlues;
       default:
         return d3.interpolateReds;
     }
   };
 
   const getMetricLabel = () => {
-    return metric === 'pm25' ? 'PM2.5 Exposure' : '';
+    switch (metric) {
+      case 'pm25':
+        return 'PM2.5 Exposure';
+      case 'top10':
+        return 'Top 10 Countries';
+      default:
+        return '';
+    }
   };
   
   const getMetricUnit = () => {
-    return metric === 'pm25' ? ' µg/m³' : '';
+    switch (metric) {
+      case 'pm25':
+        return ' µg/m³';
+      case 'top10':
+        return ' % of population';
+      default:
+        return '';
+    }
   };
-  
   const drawLegend = (svg, colorScale, maxValue, width, height) => {
     // Keep existing legend dimensions
     const legendWidth = 50;
