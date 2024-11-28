@@ -5,6 +5,7 @@ import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import GraphModal from './GraphModal';
 import Radar from './Radar';
+import TopCountries from './TopCountries';
 
 export default function Visual() {
   const svgRef = useRef(null);
@@ -19,6 +20,8 @@ export default function Visual() {
   const [selectedYear, setSelectedYear] = useState('');
   const [availableYears, setAvailableYears] = useState([]);
   const [worldData, setWorldData] = useState(null);
+
+  const [showTop10, setShowTop10] = useState(false);
 
   // states for graph modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,8 +99,7 @@ export default function Visual() {
       const pm25YearData = processDataWithYears(pm25Data, 'Country');
       const deathByPmYearData = processDeathData(
         deathByPMData, 
-        populationYearData.yearMap,
-        pm25YearData.yearMap
+        populationYearData.yearMap
       );
 
       // finds the intersection of available years across all datasets 
@@ -192,7 +194,7 @@ export default function Visual() {
     return value ? colorScale(value) : 'rgb(55, 65, 81)';
   })
   .attr('stroke', 'rgb(147, 197, 253)')
-  .attr('stroke-width', '0.5')
+  .attr('stroke-width', '0.2')
   .on('mouseover', handleMouseOver)
   .on('mouseout', handleMouseOut)
   .on('click', (event, d) => {
@@ -235,25 +237,11 @@ export default function Visual() {
   };
 
   const getMetricLabel = () => {
-    switch (metric) {
-      case 'pm25':
-        return 'PM2.5 Exposure';
-      case 'death_by_pm':
-        return 'PM2.5 Mortality Rate';  // More precise label
-      default:
-        return '';
-    }
+    return metric === 'pm25' ? 'PM2.5 Exposure' : '';
   };
   
   const getMetricUnit = () => {
-    switch (metric) {
-      case 'pm25':
-        return ' µg/m³';
-      case 'death_by_pm':
-        return ' % of population';  // Clearer unit for mortality rate
-      default:
-        return '';
-    }
+    return metric === 'pm25' ? ' µg/m³' : '';
   };
   
   const drawLegend = (svg, colorScale, maxValue, width, height) => {
@@ -424,7 +412,7 @@ export default function Visual() {
                         transition-all duration-300 shadow-lg"
                     >
                         <option value="pm25">PM2.5 Exposure</option>
-                        <option value="death_by_pm">Deaths by PM2.5</option>
+                        <option value="top10">Top 10 Countries</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                         <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -468,8 +456,7 @@ export default function Visual() {
                 <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 rounded-full shadow-lg"
                         style={{
-                            backgroundColor: metric === 'pm25' ? '#cc0000' :
-                                metric === 'respiratory' ? '#7cc5d2' : '#45c386',
+                            backgroundColor: metric === 'pm25' ? '#cc0000' : '#0077cc',
                             boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)'
                         }}
                     />
@@ -486,7 +473,28 @@ export default function Visual() {
 
     {/* Map Container - Enhanced with better gradient */}
     <div className="relative flex-1 h-full bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-        <svg ref={svgRef} className="w-full h-full" />
+    <svg ref={svgRef} className={`w-full h-full ${showTop10 ? 'blur' : ''}`} />
+
+    {metric === 'top10' && (
+  <>
+    <div 
+      className="absolute inset-0 bg-black/50 z-10"
+      onClick={() => setShowTop10(false)}
+    />
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-700/95 p-8 rounded-lg shadow-lg z-20">
+      <h3 className="text-2xl font-semibold mb-6 text-white text-center">
+        Top 10 Countries by PM2.5 Death Rate
+      </h3>
+      <TopCountries 
+        data={[...allData.death_by_pm.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10)
+          .map(([name, death_by_pm]) => ({ name, death_by_pm }))
+        }
+      />  
+    </div>
+  </>
+)}
         {/* Update tooltip content */}
       {tooltip.show && (
         <div className="fixed z-50 bg-slate-900/95 backdrop-blur-md text-white px-8 py-6 rounded-xl shadow-2xl border border-blue-900/50 transition-all duration-300"
@@ -508,17 +516,11 @@ export default function Visual() {
               <span className="text-red-400 font-medium">PM2.5:</span>
               <span className="text-white">{tooltip.content.pm25}</span>
             </p>
-            <p className="text-sm flex items-center space-x-3">
-              <span className="text-blue-400 font-medium">Deaths by PM2.5:</span>
-              <span className="text-white">{tooltip.content.death_by_pm}</span>
-            </p>
             <Radar
               pm25_radar={tooltip.content.pm25_raw}
               population_radar={tooltip.content.population_raw}
-              death_by_pm_radar={tooltip.content.death_by_pm_raw}
               max_pm25_radar={max_pm25}
               max_population_radar={max_population}
-              max_death_by_pm_radar={max_death_by_pm}
             />
           </div>
         </div>
