@@ -15,7 +15,8 @@ export default function Visual() {
   const [allData, setAllData] = useState({
     population: new Map(),
     pm25: new Map(),
-    death_by_pm: new Map()
+    death_by_pm: new Map(),
+    median_age: new Map(),
   });
   const [yearData, setYearData] = useState({});
   const [selectedYear, setSelectedYear] = useState('');
@@ -46,8 +47,9 @@ export default function Visual() {
     Promise.all([
       d3.csv('/datasets/population.csv'),
       d3.csv('/datasets/oecd_pm25_exposure.csv'),
-      d3.csv('/datasets/death_by_pm.csv')
-    ]).then(([populationData, pm25Data, deathByPMData]) => {
+      d3.csv('/datasets/death_by_pm.csv'),
+      d3.csv('/datasets/median_age.csv')
+    ]).then(([populationData, pm25Data, deathByPMData, medianAgeData]) => {
       // Process population data first
       const processDataWithYears = (data, keyName) => {
         const yearMap = new Map();
@@ -106,11 +108,13 @@ export default function Visual() {
         deathByPMData, 
         populationYearData.yearMap
       );
+      const medianAgeYearData = processDataWithYears(medianAgeData, 'Country');
 
       // finds the intersection of available years across all datasets 
       const commonYears = pm25YearData.years.filter(year => 
         populationYearData.years.includes(year) &&
-        deathByPmYearData.years.includes(year)
+        deathByPmYearData.years.includes(year) &&
+        medianAgeYearData.years.includes(year)
       );
 
       setAvailableYears(commonYears);
@@ -119,7 +123,8 @@ export default function Visual() {
       setYearData({
         population: populationYearData.yearMap,
         pm25: pm25YearData.yearMap,
-        death_by_pm: deathByPmYearData.yearMap
+        death_by_pm: deathByPmYearData.yearMap,
+        median_age: medianAgeYearData.yearMap
       });
     });
   }, []);
@@ -131,7 +136,8 @@ export default function Visual() {
     const currentData = {
       population: yearData.population.get(selectedYear),
       pm25: yearData.pm25.get(selectedYear),
-      death_by_pm: yearData.death_by_pm.get(selectedYear)
+      death_by_pm: yearData.death_by_pm.get(selectedYear),
+      median_age: yearData.median_age.get(selectedYear)
     };
 
     setAllData(currentData);
@@ -367,29 +373,42 @@ export default function Visual() {
       .text('Max');
 };
 
-  const handleMouseOver = (event, d) => {
-    d3.select(event.currentTarget)
-      .attr('stroke-width', '1');
-    
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const countryName = d.properties.name;
-    
-    setTooltip({
-      show: true,
-      content: {
-        name: countryName,
-        population: allData.population.get(countryName)?.toLocaleString() || 'No data',
-        pm25: allData.pm25.get(countryName)?.toFixed(1) + ' µg/m³' || 'No data',
-        death_by_pm: (allData.death_by_pm.get(countryName)?.toFixed(4) || 'No data') + '% of population',
-        
-        population_raw: allData.population.get(countryName) || 0,
-        pm25_raw: allData.pm25.get(countryName)?.toFixed(1) || 0,
-        death_by_pm_raw: allData.death_by_pm.get(countryName) || 0
-      },
-      x: bounds.left + bounds.width,
-      y: bounds.top + (bounds.height / 2)
-    });
-  };
+// Add a function to calculate vulnerability based on age
+const getVulnerabilityLevel = (age) => {
+  if (age < 20) return { level: 'Lower', color: 'text-green-400' };
+  if (age < 35) return { level: 'Moderate', color: 'text-yellow-400' };
+  return { level: 'Higher', color: 'text-red-400' };
+};
+
+// Update handleMouseOver function
+const handleMouseOver = (event, d) => {
+  d3.select(event.currentTarget)
+    .attr('stroke-width', '1');
+  
+  const bounds = event.currentTarget.getBoundingClientRect();
+  const countryName = d.properties.name;
+  const medianAge = allData.median_age.get(countryName);
+  const vulnerability = getVulnerabilityLevel(medianAge);
+  
+  setTooltip({
+    show: true,
+    content: {
+      name: countryName,
+      population: allData.population.get(countryName)?.toLocaleString() || 'No data',
+      pm25: allData.pm25.get(countryName)?.toFixed(1) + ' µg/m³' || 'No data',
+      death_by_pm: (allData.death_by_pm.get(countryName)?.toFixed(4) || 'No data') + '% of population',
+      median_age: medianAge?.toFixed(1) + ' years' || 'No data',
+      vulnerability: vulnerability,
+      
+      population_raw: allData.population.get(countryName) || 0,
+      pm25_raw: allData.pm25.get(countryName)?.toFixed(1) || 0,
+      death_by_pm_raw: allData.death_by_pm.get(countryName) || 0,
+      median_age_raw: medianAge || 0
+    },
+    x: bounds.left + bounds.width,
+    y: bounds.top + (bounds.height / 2)
+  });
+};
 
   const handleMouseOut = (event) => {
     d3.select(event.currentTarget)
@@ -562,13 +581,25 @@ export default function Visual() {
               <span className="text-blue-400 font-medium">Death Rate:</span>
               <span className="text-white">{tooltip.content.death_by_pm}</span>
             </p>
+            <p className="text-sm flex items-center space-x-3">
+              <span className="text-green-400 font-medium">Median Age:</span>
+              <span className="text-white">{tooltip.content.median_age}</span>
+            </p>
+            <p className="text-sm flex items-center space-x-3">
+              <span className="text-gray-400 font-medium">Vulnerability:</span>
+              <span className={tooltip.content.vulnerability.color}>
+                {tooltip.content.vulnerability.level} Risk
+              </span>
+            </p>
             <Radar
               pm25_radar={tooltip.content.pm25_raw}
               population_radar={tooltip.content.population_raw}
               death_by_pm_radar={tooltip.content.death_by_pm_raw}
+              median_age_radar={tooltip.content.median_age_raw}
               max_pm25_radar={max_pm25}
               max_population_radar={max_population}
               max_death_by_pm_radar={max_death_by_pm}
+              max_median_age_radar={Math.max(...allData.median_age.values())}
             />
           </div>
         </div>
