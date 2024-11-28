@@ -527,6 +527,10 @@ export default function Visual() {
               <span className="text-red-400 font-medium">PM2.5:</span>
               <span className="text-white">{tooltip.content.pm25}</span>
             </p>
+            <p className="text-sm flex items-center space-x-3">
+              <span className="text-blue-400 font-medium">Death Rate:</span>
+              <span className="text-white">{tooltip.content.death_by_pm}</span>
+            </p>
             <Radar
               pm25_radar={tooltip.content.pm25_raw}
               population_radar={tooltip.content.population_raw}
