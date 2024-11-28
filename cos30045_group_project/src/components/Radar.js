@@ -1,7 +1,7 @@
 import React from 'react'
 import * as d3 from 'd3';
 
-export default function Radar({ pm25_radar, population_radar, respiratory_radar, cardiovascular_radar, max_pm25_radar, max_population_radar, max_respiratory_radar, max_cardiovascular_radar }) {
+export default function Radar({ pm25_radar, population_radar, death_by_pm_radar, max_pm25_radar, max_population_radar, max_death_by_pm_radar }) {
     
     // normalize the data to determine the values if max value is 10
     function normalize_data_array(values, max_values) {
@@ -9,8 +9,8 @@ export default function Radar({ pm25_radar, population_radar, respiratory_radar,
     }
 
     // array of values
-    let maxValues = [max_pm25_radar, max_population_radar, max_respiratory_radar, max_cardiovascular_radar];
-    let ori_data = [pm25_radar, population_radar, respiratory_radar, cardiovascular_radar];
+    let maxValues = [max_pm25_radar, max_population_radar, max_death_by_pm_radar];
+    let ori_data = [pm25_radar, population_radar, death_by_pm_radar];
     let processed_data = normalize_data_array(ori_data, maxValues);
 
     // console.log(processed_data);
@@ -21,12 +21,13 @@ export default function Radar({ pm25_radar, population_radar, respiratory_radar,
     let data = {
         "PM2.5 Exposure Level": processed_data[0], 
         "Population": processed_data[1], 
-        "Respiratory": processed_data[2], 
-        "Cardiovascular": processed_data[3]
+        "Death by PM2.5": processed_data[2]
+        // "Respiratory": processed_data[2], 
+        // "Cardiovascular": processed_data[3]
     };
 
     // captions or labels
-    let features = ["PM2.5 Exposure Level", "Population", "Respiratory", "Cardiovascular"];
+    let features = ["PM2.5 Exposure Level", "Population", "Death by PM2.5"];
 
     // svg dimensions
     let width = 300;
