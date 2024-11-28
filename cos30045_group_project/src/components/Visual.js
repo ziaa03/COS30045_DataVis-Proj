@@ -6,6 +6,7 @@ import * as topojson from 'topojson-client';
 import GraphModal from './GraphModal';
 import Radar from './Radar';
 import TopCountries from './TopCountries';
+import MortalityComparison from './MortalityComparison';
 
 export default function Visual() {
   const svgRef = useRef(null);
@@ -21,7 +22,11 @@ export default function Visual() {
   const [availableYears, setAvailableYears] = useState([]);
   const [worldData, setWorldData] = useState(null);
 
+  // state for top 10 countries modal
   const [showTop10, setShowTop10] = useState(false);
+
+  // state for mortality comparison modal
+  const [showMortalityComparison, setShowMortalityComparison] = useState(false);
 
   // states for graph modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -240,6 +245,8 @@ export default function Visual() {
         return 'PM2.5 Exposure';
       case 'top10':
         return 'Top 10 Countries';
+      case 'mortality_comparison':
+        return 'Mortality Comparison';
       default:
         return '';
     }
@@ -250,6 +257,8 @@ export default function Visual() {
       case 'pm25':
         return ' µg/m³';
       case 'top10':
+        return ' % of population';
+      case 'mortality_comparison':
         return ' % of population';
       default:
         return '';
@@ -424,6 +433,7 @@ export default function Visual() {
                     >
                         <option value="pm25">PM2.5 Exposure</option>
                         <option value="top10">Top 10 Countries</option>
+                        <option value="mortality_comparison">Mortality Comparison</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                         <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -482,32 +492,53 @@ export default function Visual() {
         </div>
     </div>
 
-    {/* Map Container - Enhanced with better gradient */}
+    {/* Map Container */}
     <div className="relative flex-1 h-full bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
-    <svg ref={svgRef} className={`w-full h-full ${showTop10 ? 'blur' : ''}`} />
+        <svg ref={svgRef} className="w-full h-full" />
 
-    {metric === 'top10' && (
-  <>
-    <div 
-      className="absolute inset-0 bg-black/50 z-10"
-      onClick={() => setShowTop10(false)}
-    />
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-700/95 p-8 rounded-lg shadow-lg z-20">
-      <h3 className="text-2xl font-semibold mb-6 text-white text-center">
-        Top 10 Countries by PM2.5 Death Rate
-      </h3>
-      <TopCountries 
-        data={[...allData.death_by_pm.entries()]
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 10)
-          .map(([name, death_by_pm]) => ({ name, death_by_pm }))
-        }
-      />  
-    </div>
-  </>
-)}
-        {/* Update tooltip content */}
-      {tooltip.show && (
+        {/* Overlay for Top10 and Mortality Comparison */}
+        {(metric === 'top10' || metric === 'mortality_comparison') && (
+          <div 
+            className="absolute inset-0 bg-black/40 z-10 backdrop-blur-sm transition-opacity duration-300"
+            onClick={() => {
+              if (metric === 'top10') setShowTop10(false);
+              if (metric === 'mortality_comparison') setShowMortalityComparison(false);
+            }}
+          />
+        )}
+
+        {/* Top10 Modal */}
+        {metric === 'top10' && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900/95 p-8 rounded-xl shadow-2xl z-20 border border-blue-900/30">
+            <h3 className="text-2xl font-semibold mb-6 text-white text-center">
+              Top 10 Countries by PM2.5 Death Rate
+            </h3>
+            <TopCountries 
+              data={[...allData.death_by_pm.entries()]
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10)
+                .map(([name, death_by_pm]) => ({ name, death_by_pm }))
+              }
+            />
+          </div>
+        )}
+
+        {/* Mortality Comparison Modal */}
+        {metric === 'mortality_comparison' && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900/95 p-8 rounded-xl shadow-2xl z-20 border border-blue-900/30">
+            <h3 className="text-2xl font-semibold mb-6 text-white text-center">
+              Mortality Rates & PM2.5 Levels by Range ({selectedYear})
+              </h3>
+           
+            <MortalityComparison 
+              data={allData}
+              selectedYear={selectedYear}
+            />
+          </div>
+        )}
+
+        {/* Tooltip (keep existing code) */}
+        {tooltip.show && (
         <div className="fixed z-50 bg-slate-900/95 backdrop-blur-md text-white px-8 py-6 rounded-xl shadow-2xl border border-blue-900/50 transition-all duration-300"
           style={{
             left: `${tooltip.x}px`,
@@ -541,13 +572,14 @@ export default function Visual() {
         </div>
       )}
       </div>
-      {/* Add the GraphModal here, right before the closing section tag */}
+
+      {/* Graph Modal */}
       <GraphModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         countryData={selectedCountryData}
         selectedMetric={metric}
-    />
-</section>
+      />
+    </section>
   );
 }
