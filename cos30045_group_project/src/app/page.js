@@ -5,6 +5,7 @@ import Landing from '../components/Landing';
 import Introduction from '../components/Introduction';
 import Objectives from '../components/Objectives';
 import Visual from '../components/Visual';
+import Fidings from '../components/Fidings';
 import Footer from '../components/Footer';
 import React from 'react';
 
@@ -16,6 +17,7 @@ function MyApp() {
       <Introduction />
       <Objectives />
       <Visual />
+      <Fidings />
       <Footer />
     </>
   );
