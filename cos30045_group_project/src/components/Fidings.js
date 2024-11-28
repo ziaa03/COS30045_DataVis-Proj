@@ -10,31 +10,32 @@ export default function Findings() {
     {
         title: "Key Findings",
         text: [
-            "Countries with higher population has higher outdoor particulate matter pollution mortality rate", 
-            "The increase and decrease of PM2.5 exposure levels affect more on countries with higher total population such as India and China.",
-            "Developed countries has shown a decrease of PM2.5 exposure level by time, while other countries shown a slight increase or maintained their PM2.5 exposure levels.",
-            "Coutries such as Niger defied the expected patterns compared to other coutries because altough Niger has the highest PM2.5 exposure level and smaller total population, it's mortality rate is lower than those countries with lower PM2.5 exposure level and higher total population such as China and India."
-
+            "The increase and decrease in PM2.5 exposure levels impact countries with larger populations and higher median age, such as India and China, more significantly.",
+            "Countries with higher populations and larger median ages have higher outdoor particulate matter pollution mortality rates.", 
+            "Western developed countries such as United States, Germany and France have shown a decrease in PM2.5 exposure levels over time, while other countries have exhibited a slight increase or maintained their PM2.5 exposure levels.",
         ]
     },
     {
         title: "Data-Driven Insights",
         text: [
-            "From 1990 to 2020, developed countries such as United States, France and Germany have shown gradually deacrease of PM2.5 Exposure Levels.", 
+            "In India, PM2.5 exposure levels increased drastically from 50.10 µg/m³ in 2010 to 79.04 µg/m³ in 2014. During the same period, the outdoor particulate matter pollution mortality rate also rose from 0.036% to 0.061%.",
+            "Countries with PM2.5 exposure levels below 6.3 µg/m³, such as Sweden, Norway, and Finland, have outdoor particulate matter pollution mortality rates below 0.001%." ,
+            "In 2020, Niger had a low mortality rate of 0.0187% despite having the highest PM2.5 exposure level (85.1 µg/m³) and a smaller total population (24,333,639). This may be attributed to its relatively low median age of 14.8 years."
         ]
     },
     {
         title: "Conclusion",
         text: [
-            "The analysis confirms a strong positive correlation between PM2.5 exposure, total population and death rates. It underscores the effectiveness of air quality regulations in reducing health risks in developed nations, while highlighting the need for targeted interventions in developing regions."
+            "There is a strong correlation between a country’s PM2.5 exposure level, population size, median age, and outdoor particulate matter pollution mortality rate.",
+            "Higher exposure levels, larger populations, and older median ages collectively contribute to increased mortality rates, while countries with lower exposure and younger populations tend to have lower mortality rates."
         ]
     },
     {
         title: "Actionable Steps",
         text: [
-            "Encourage global collaboration on emission reduction technologies.",
-            "Implement stricter air quality policies in regions with rising PM2.5 exposure.",
-            "Increase public health funding to mitigate the effects of pollution on vulnerable populations."
+            "Enforce stricter emissions controls and adopt clean energy in populous, industrial regions.",
+            "Increase healthcare access and awareness in countries with older populations and high PM2.5 exposure.",
+            "Offer financial and technical aid to help nations reduce PM2.5 while developing sustainably."
         ]
     }
   ]
@@ -78,7 +79,7 @@ export default function Findings() {
   };
 
   return (
-    <div className='relative w-full h-[calc(100vh)] bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex flex-row items-start scroll-section'>
+    <div className='relative w-full h-[calc(100vh)] bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex flex-row items-start scroll-section' id='analysis'>
       {/* Slider container */}
       <div
         ref={sliderRef} // Attach the ref here
