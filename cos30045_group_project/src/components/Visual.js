@@ -534,8 +534,10 @@ export default function Visual() {
             <Radar
               pm25_radar={tooltip.content.pm25_raw}
               population_radar={tooltip.content.population_raw}
+              death_by_pm_radar={tooltip.content.death_by_pm_raw}
               max_pm25_radar={max_pm25}
               max_population_radar={max_population}
+              max_death_by_pm_radar={max_death_by_pm}
             />
           </div>
         </div>
