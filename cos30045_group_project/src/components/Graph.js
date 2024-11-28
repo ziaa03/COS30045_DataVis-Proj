@@ -167,7 +167,7 @@ export default function Graph({ selectedCountry }) {
     // Extracting and processing data for rendering
     const { oecd, sub, pop, color, title } = dataset;
 
-    // Find the row for "Japan"
+    // Find the row for selected country
     const country_oecd = oecd.find(d => d['Country'] === selectedCountry);
     const country_rate = sub.find(d => d['Country'] === selectedCountry);
     const country_pop = pop.find(d => d['Country'] === selectedCountry);
@@ -182,7 +182,7 @@ export default function Graph({ selectedCountry }) {
     // Skip the "Country" key since it's not a year
     if (year !== "Country") {
       // Add the values for each year (population + sub values)
-      country_sub[year] = country_rate[year] / country_pop[year] * 100 ;
+      country_sub[year] = (country_rate[year] / country_pop[year] * 100).toFixed(3) ;
     }
   });
   
