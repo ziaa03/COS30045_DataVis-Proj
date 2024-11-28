@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 export default function Findings() {
-  const sliderRef = useRef(null); // Create a ref for the slider
+  const sliderRef = useRef(null);
 
   const sections = [
     {
@@ -82,7 +82,7 @@ export default function Findings() {
     <div className='relative w-full h-[calc(100vh)] bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex flex-row items-start scroll-section' id='analysis'>
       {/* Slider container */}
       <div
-        ref={sliderRef} // Attach the ref here
+        ref={sliderRef} 
         className='h-screen w-full overflow-hidden flex flex-nowrap text-center bg-[url("/images/findings-bg1.jpg")] bg-cover bg-center'
         id='slider'
       >
@@ -91,26 +91,24 @@ export default function Findings() {
         {sections.map((section, index) => {
           return (
             <div
-              key={section.title + index} // Combine section title with index for uniqueness
+              key={section.title + index}
               className='bg-transparent text-white space-y-4 flex-none w-full flex flex-col items-center justify-center backdrop-blur-md'
             >
-              {/* Title Section */}
               <motion.h2
-                key={`title-${section.title + index}`} // Unique key for the title
+                key={`title-${section.title + index}`} 
                 className="text-4xl max-w-md"
-                initial={{ opacity: 0, x: -100 }}  // Initial state (hidden and off-screen to the left)
-                whileInView={{ opacity: 1, x: 0 }}   // Trigger animation when in view
-                exit={{ opacity: 0, x: 100 }}        // State when leaving (fade out and slide to the right)
-                transition={{ duration: 1 }}         // Transition duration
+                initial={{ opacity: 0, x: -100 }}  
+                whileInView={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 100 }}       
+                transition={{ duration: 1 }}         
               >
                 {section.title}
               </motion.h2>
 
-              {/* Text Content Section */}
               {section.text && Array.isArray(section.text) ? (
                 section.text.map((textItem, idx) => (
                   <motion.li
-                    key={`text-${section.title + idx}`} // Unique key for each paragraph
+                    key={`text-${section.title + idx}`} 
                     className="max-w-md"
                     initial={{ opacity: 0, x: -100 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -122,7 +120,7 @@ export default function Findings() {
                 ))
               ) : (
                 <motion.li
-                  key={`text-${section.title}`} // Key for empty text
+                  key={`text-${section.title}`}
                   className="max-w-md"
                   initial={{ opacity: 0, x: -100 }}
                   whileInView={{ opacity: 1, x: 0 }}
