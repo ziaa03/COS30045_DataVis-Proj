@@ -23,8 +23,6 @@ export default function Radar({ pm25_radar, population_radar, death_by_pm_radar,
         "Population": processed_data[1], 
         "Death by PM2.5": processed_data[2],
         "Median Age": processed_data[3]
-        // "Respiratory": processed_data[2], 
-        // "Cardiovascular": processed_data[3]
     };
 
     // captions or labels

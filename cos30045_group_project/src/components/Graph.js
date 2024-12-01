@@ -8,9 +8,7 @@ import RadialPopulationChart from './RadialPopulation';
 // parent component - graphmodal.js 
 // receive props from parent component 
 export default function Graph({ selectedCountry }) {
-    // const isFirstRender = useRef(true);
     const [selectedDataset, setSelectedDataset] = useState('pm_death_rate');
-    // const [selectedCountry, setSelectedCountry] = useState('Australia');
     if (!selectedCountry || !selectedDataset) {
       return <div className="text-white text-center">Missing required data</div>;
   }
@@ -24,16 +22,6 @@ export default function Graph({ selectedCountry }) {
 
     // Dropdown options
     const options = [
-      // {
-      //     value: 'respiratory',
-      //     label: 'Respiratory Death Rate',
-      //     description: 'Deaths per 100,000 population'
-      // },
-      // {
-      //     value: 'cardiovascular',
-      //     label: 'Cardiovascular Death Rate',
-      //     description: 'Deaths per 100,000 population'
-      // },
       {
         value: 'pm_death_rate',
         label: 'Outdoor Particulate Matter Pollution Death Rate',
@@ -80,12 +68,6 @@ export default function Graph({ selectedCountry }) {
   }, []);
 
   useEffect(() => {
-    // If it's not the first render, do nothing
-    // if (!isFirstRender.current) {
-    //     return;
-    // }
-
-    // isFirstRender.current = false; // Mark the first render as completed
 
     // Function to load data based on selection
     const loadData = (datasetType) => {
@@ -106,22 +88,7 @@ export default function Graph({ selectedCountry }) {
             title: 'Particulate Matter Death Rate', 
             measurement: '%'
           };
-        // case 'Respiratory Death Rate':
-        // case 'respiratory':  // Add case for metric from map
-        //   return { 
-        //     data: d3.csv('/datasets/respiratory_death_rate.csv'), 
-        //     color: '#FFA500', 
-        //     title: datasetType, 
-        //     measurement: '%'
-        //   };
-        // case 'Cardiovascular Death Rate':
-        // case 'cardiovascular':  // Add case for metric from map
-        //   return { 
-        //     data: d3.csv('/datasets/cardiovascular_death_rate.csv'), 
-        //     color: '#FFA500', 
-        //     title: datasetType, 
-        //     measurement: '%'
-        //   };
+  
         default:
           return { 
             data: d3.csv('/datasets/death_by_pm.csv'), 
