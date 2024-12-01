@@ -7,6 +7,7 @@ import GraphModal from './GraphModal';
 import Radar from './Radar';
 import TopCountries from './TopCountries';
 import MortalityComparison from './MortalityComparison';
+import MetricPanel from './MetricPanel';
 
 export default function Visual() {
   const svgRef = useRef(null);
@@ -206,6 +207,10 @@ export default function Visual() {
   })
   .attr('stroke', 'rgb(147, 197, 253)')
   .attr('stroke-width', '0.2')
+  .style('cursor', d => {
+    const value = allData[metric].get(d.properties.name);
+    return value ? 'pointer' : 'default';
+  }) // Cursor changes only if data is available
   .on('mouseover', handleMouseOver)
   .on('mouseout', handleMouseOut)
   .on('click', (event, d) => {
@@ -248,11 +253,11 @@ export default function Visual() {
   const getMetricLabel = () => {
     switch (metric) {
       case 'pm25':
-        return 'PM2.5 Exposure';
+        return 'PM2.5 Exposure Level';
       case 'top10':
-        return 'Top 10 Countries';
+        return 'Mortality Rate';
       case 'mortality_comparison':
-        return 'Mortality Comparison';
+        return 'PM2.5 Concentration Impact';
       default:
         return '';
     }
@@ -380,33 +385,39 @@ const getVulnerabilityLevel = (age) => {
   return { level: 'Higher', color: 'text-red-400' };
 };
 
-// Update handleMouseOver function
+// handleMouseOver function
 const handleMouseOver = (event, d) => {
-  d3.select(event.currentTarget)
-    .attr('stroke-width', '1');
-  
-  const bounds = event.currentTarget.getBoundingClientRect();
   const countryName = d.properties.name;
+  const dataAvailable = allData[metric].has(countryName);
+
+  if (!dataAvailable) {
+    // No data available; do not show tooltip
+    return;
+  }
+
+  d3.select(event.currentTarget).attr('stroke-width', '1');
+
+  const bounds = event.currentTarget.getBoundingClientRect();
   const medianAge = allData.median_age.get(countryName);
   const vulnerability = getVulnerabilityLevel(medianAge);
-  
+
   setTooltip({
     show: true,
     content: {
       name: countryName,
       population: allData.population.get(countryName)?.toLocaleString() || 'No data',
       pm25: allData.pm25.get(countryName)?.toFixed(1) + ' µg/m³' || 'No data',
-      death_by_pm: (allData.death_by_pm.get(countryName)?.toFixed(4) || 'No data') + '% of population',
+      death_by_pm:
+        (allData.death_by_pm.get(countryName)?.toFixed(4) || 'No data') + '% of population',
       median_age: medianAge?.toFixed(1) + ' years' || 'No data',
       vulnerability: vulnerability,
-      
       population_raw: allData.population.get(countryName) || 0,
-      pm25_raw: allData.pm25.get(countryName)?.toFixed(1) || 0,
+      pm25_raw: allData.pm25.get(countryName) || 0,
       death_by_pm_raw: allData.death_by_pm.get(countryName) || 0,
-      median_age_raw: medianAge || 0
+      median_age_raw: medianAge || 0,
     },
     x: bounds.left + bounds.width,
-    y: bounds.top + (bounds.height / 2)
+    y: bounds.top + bounds.height / 2,
   });
 };
 
@@ -424,41 +435,22 @@ const handleMouseOver = (event, d) => {
     <section className="relative w-full h-[calc(100vh)] bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex flex-row items-start scroll-section" id="visual">
 
     {/* Controls Panel - Enhanced with more modern styling */}
-    <div className="w-80 h-full bg-slate-900/90 backdrop-blur-lg p-8 flex flex-col space-y-8 border-r border-blue-900/30 pt-24 shadow-2xl">
+    <div className="w-[400px] h-full bg-slate-900/90 backdrop-blur-lg p-8 flex flex-col space-y-8 border-r border-blue-900/30 pt-24 shadow-2xl">
         <div className="flex flex-col space-y-8">
             {/* Enhanced Title */}
             <div className="space-y-2">
                 <h2 className="text-white text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                     Global PM2.5 Analysis
                 </h2>
-                <p className="text-slate-400 text-sm">
-                    Interactive visualization of global air quality metrics
-                </p>
             </div>
 
             {/* Enhanced Metric Selector */}
             <div className="flex flex-col space-y-3">
-                <label className="text-slate-200 text-sm font-semibold">
-                    Select Metric
-                </label>
                 <div className="relative">
-                    <select
-                        value={metric}
-                        onChange={(e) => setMetric(e.target.value)}
-                        className="w-full bg-slate-800/90 text-white rounded-lg px-4 py-3 
-                        appearance-none border border-blue-900/50 hover:border-blue-400/50 
-                        focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 
-                        transition-all duration-300 shadow-lg"
-                    >
-                        <option value="pm25">PM2.5 Exposure</option>
-                        <option value="top10">Top 10 Countries</option>
-                        <option value="mortality_comparison">Mortality Comparison</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
+                <MetricPanel 
+                  metric={metric} 
+                  setMetric={setMetric}
+                />
                 </div>
             </div>
 
@@ -487,26 +479,6 @@ const handleMouseOver = (event, d) => {
                     <span>{availableYears[0]}</span>
                     <span>{availableYears[availableYears.length - 1]}</span>
                 </div>
-            </div>
-
-            {/* Enhanced Legend Info */}
-            <div className="flex flex-col space-y-4 p-5 bg-gradient-to-br from-slate-800/50 
-                to-slate-700/30 rounded-xl border border-blue-900/30 backdrop-blur-lg shadow-xl">
-                <h3 className="text-slate-200 text-sm font-semibold">Current Metric</h3>
-                <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 rounded-full shadow-lg"
-                        style={{
-                            backgroundColor: metric === 'pm25' ? '#cc0000' : '#0077cc',
-                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)'
-                        }}
-                    />
-                    <span className="text-white text-sm font-medium">
-                        {getMetricLabel()}
-                    </span>
-                </div>
-                <span className="text-slate-400 text-xs font-medium px-2 py-1 bg-slate-800/50 rounded-md w-fit">
-                    Unit: {getMetricUnit()}
-                </span>
             </div>
         </div>
     </div>
